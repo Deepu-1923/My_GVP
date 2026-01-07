@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "316962693428",
+    "project_id": "mygvp-718d4",
+    "storage_bucket": "mygvp-718d4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316962693428:android:779384bb54b66c8f5a0561",
+        "android_client_info": {
+          "package_name": "com.example.mygvp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHVsZUka0Ry72E2lvejTIz0RPdOopWbwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
