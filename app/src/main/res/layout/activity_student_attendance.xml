@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:gravity="center"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView
-        android:text="Welcome Faculty"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#F5F5F5">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="30dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         app:cardBackgroundColor="@color/white">
@@ -30,7 +24,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Live Attendance Session"
+                android:text="Mark Your Attendance"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
@@ -38,13 +32,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Open a 60-second window for students"
+                android:text="Enter the Subject and the 4-digit PIN provided by your faculty."
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="#666666"/>
 
             <EditText
-                android:id="@+id/et_subject_name"
+                android:id="@+id/et_student_subject"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="16dp"
@@ -53,36 +47,29 @@
                 android:padding="12dp"
                 android:textColor="@color/black"/>
 
-            <TextView
-                android:id="@+id/tv_session_pin"
+            <EditText
+                android:id="@+id/et_student_pin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="PIN: ----"
-                android:textSize="32sp"
-                android:textStyle="bold"
+                android:layout_height="50dp"
+                android:layout_marginTop="12dp"
+                android:hint="PIN (----)"
+                android:inputType="number"
+                android:maxLength="4"
+                android:background="@drawable/bg_gray_input"
+                android:padding="12dp"
                 android:textAlignment="center"
-                android:textColor="#4CAF50"
-                android:visibility="gone"/>
+                android:textSize="20sp"
+                android:letterSpacing="0.5"
+                android:textColor="@color/black"/>
 
             <Button
-                android:id="@+id/btn_start_session"
+                android:id="@+id/btn_submit_attendance"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
-                android:text="Generate PIN &amp; Start"
-                android:backgroundTint="#6200EE"
+                android:text="Submit Attendance"
+                android:backgroundTint="#4CAF50"
                 android:textColor="@color/white"/>
-
-            <Button
-                android:id="@+id/btn_end_session"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="10dp"
-                android:text="End Session (Lock Attendance)"
-                android:backgroundTint="#D32F2F"
-                android:textColor="@color/white"
-                android:visibility="gone"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

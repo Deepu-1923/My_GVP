@@ -120,8 +120,11 @@ public class StudentDashboardActivity extends AppCompatActivity {
         });
 
         // Placeholder modules
-        cardAttendance.setOnClickListener(v ->
-                Toast.makeText(this, "Attendance – Coming Soon", Toast.LENGTH_SHORT).show());
+        cardAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(StudentDashboardActivity.this, StudentAttendanceActivity.class);
+            intent.putExtra("rollNo", rollNo); // Pass the roll number to the new screen
+            startActivity(intent);
+        });
 
         cardFee.setOnClickListener(v ->
                 Toast.makeText(this, "Fee Payment – Coming Soon", Toast.LENGTH_SHORT).show());
