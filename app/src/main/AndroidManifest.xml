@@ -22,6 +22,7 @@
         <activity android:name=".student.StudentDashboardActivity"/>
         <activity android:name=".student.StudentResultsActivity"/>
         <activity android:name=".student.ForgotPasswordActivity" />
+        <activity android:name=".UploadAchievementActivity" />
         <!-- MAIN / LAUNCHER -->
         <activity
             android:name=".MainActivity"
