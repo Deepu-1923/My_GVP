@@ -14,7 +14,7 @@
     android:layout_marginTop="50dp"
     android:layout_marginBottom="10dp"
     android:src="@drawable/gvplogo"
-    android:contentDescription="College Logo" />
+    android:contentDescription="College Logo"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
                 android:textStyle="bold"
                 app:backgroundTint="#C6B7E2"
                 app:cornerRadius="25dp"
-                app:elevation="15dp" />
+                app:elevation="15dp"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
