@@ -16,7 +16,22 @@
     <string name="upload">Upload</string>
     <string name="view">View</string>
 
-    <!--    <string name="password">Password</string>-->
+    <!-- Home Page Strings -->
+    <string name="welcome_to">Welcome to</string>
+    <string name="mygvp_digital">MyGVP Digital</string>
+    <string name="quick_services">Quick Services</string>
+    <string name="explore_campus">Explore\nCampus</string>
+    <string name="faculty_directory">Faculty\nDirectory</string>
+    <string name="happening_now">Happening\nNow</string>
+    <string name="official_notices">Official\nNotices</string>
+    <string name="campus_updates">Campus Updates</string>
+    <string name="campus_updates_desc">Stay tuned for more updates about our campus life and activities.</string>
+    <string name="launch_portals">Launch Portals</string>
+    <string name="choose_portal">Choose Your Portal</string>
+    <string name="select_access_desc">Select the appropriate access to continue.</string>
+    <string name="administrator">Administrator</string>
+    <string name="faculty_member">Faculty Member</string>
+
     <string-array name="years">
         <item>1st Year</item>
         <item>2nd Year</item>

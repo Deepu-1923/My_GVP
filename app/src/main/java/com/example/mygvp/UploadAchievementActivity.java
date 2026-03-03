@@ -16,12 +16,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.mygvp.student.Achievement;
+import com.example.mygvp.student.AchievementAdapter;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,8 +32,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,8 +51,11 @@ public class UploadAchievementActivity extends AppCompatActivity {
     private RecyclerView rvAchievements;
     private LinearLayout layoutEmptyState;
     private ScrollView layoutUploadForm;
-    private FloatingActionButton fabAdd;
+    private ExtendedFloatingActionButton fabAdd;
     private DatabaseReference dbRef;
+    
+    private AchievementAdapter adapter;
+    private List<Achievement> achievementList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +66,7 @@ public class UploadAchievementActivity extends AppCompatActivity {
         rvAchievements = findViewById(R.id.rv_achievements);
         layoutEmptyState = findViewById(R.id.layout_empty_state);
         layoutUploadForm = findViewById(R.id.layout_upload_form);
-        fabAdd = findViewById(R.id.fab_add_achievement);
+        fabAdd = findViewById(R.id.fab_add_achievement); // Fixed cast
         spinnerType = findViewById(R.id.spinner_type);
         spinnerDomain = findViewById(R.id.spinner_domain);
         btnSelectFile = findViewById(R.id.btn_select_file);
@@ -70,8 +78,9 @@ public class UploadAchievementActivity extends AppCompatActivity {
         loggedInRollNo = prefs.getString("LOGGED_IN_ROLL_NO", "Unknown");
         dbRef = FirebaseDatabase.getInstance().getReference("achievements");
 
+        setupRecyclerView();
         setupSpinners();
-        checkFirebaseData();
+        fetchAchievements();
 
         // 3. Button Listeners
         btnSelectFile.setOnClickListener(v -> openFilePicker());
@@ -79,27 +88,45 @@ public class UploadAchievementActivity extends AppCompatActivity {
 
         fabAdd.setOnClickListener(v -> {
             layoutEmptyState.setVisibility(View.GONE);
+            rvAchievements.setVisibility(View.GONE);
             layoutUploadForm.setVisibility(View.VISIBLE);
             fabAdd.hide();
         });
     }
 
-    private void checkFirebaseData() {
+    private void setupRecyclerView() {
+        rvAchievements.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new AchievementAdapter(this, achievementList);
+        rvAchievements.setAdapter(adapter);
+    }
+
+    private void fetchAchievements() {
         dbRef.orderByChild("rollNo").equalTo(loggedInRollNo)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            layoutEmptyState.setVisibility(View.GONE);
-                            rvAchievements.setVisibility(View.VISIBLE);
-                            layoutUploadForm.setVisibility(View.GONE);
-                            fabAdd.show();
-                        } else {
+                        achievementList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            try {
+                                Achievement achievement = dataSnapshot.getValue(Achievement.class);
+                                if (achievement != null) {
+                                    achievementList.add(achievement);
+                                }
+                            } catch (Exception e) {
+                                // Skip malformed data
+                            }
+                        }
+                        
+                        if (achievementList.isEmpty()) {
                             layoutEmptyState.setVisibility(View.VISIBLE);
                             rvAchievements.setVisibility(View.GONE);
-                            layoutUploadForm.setVisibility(View.GONE);
-                            fabAdd.show();
+                        } else {
+                            layoutEmptyState.setVisibility(View.GONE);
+                            rvAchievements.setVisibility(View.VISIBLE);
                         }
+                        adapter.notifyDataSetChanged();
+                        layoutUploadForm.setVisibility(View.GONE);
+                        fabAdd.show();
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
@@ -130,7 +157,10 @@ public class UploadAchievementActivity extends AppCompatActivity {
     }
 
     private void uploadToCloudinary() {
-        if (selectedFileUri == null) return;
+        if (selectedFileUri == null) {
+            Toast.makeText(this, "Please select a file", Toast.LENGTH_SHORT).show();
+            return;
+        }
         btnSubmit.setEnabled(false);
         btnSubmit.setText("Uploading...");
 
@@ -143,7 +173,7 @@ public class UploadAchievementActivity extends AppCompatActivity {
                     @Override public void onError(String requestId, ErrorInfo error) {
                         btnSubmit.setEnabled(true);
                         btnSubmit.setText("Upload Now");
-                        Toast.makeText(UploadAchievementActivity.this, "Upload failed: " + error.getDescription(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(UploadAchievementActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
                     }
                     @Override public void onStart(String requestId) {}
                     @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
@@ -156,6 +186,7 @@ public class UploadAchievementActivity extends AppCompatActivity {
         if (id == null) return;
 
         Map<String, Object> data = new HashMap<>();
+        data.put("id", id);
         data.put("rollNo", loggedInRollNo);
         data.put("type", spinnerType.getSelectedItem().toString());
         data.put("domain", spinnerDomain.getSelectedItem().toString());
@@ -165,13 +196,9 @@ public class UploadAchievementActivity extends AppCompatActivity {
         dbRef.child(id).setValue(data).addOnSuccessListener(aVoid -> {
             btnSubmit.setEnabled(true);
             btnSubmit.setText("Upload Now");
-            layoutUploadForm.setVisibility(View.GONE);
-            fabAdd.show();
-            Toast.makeText(this, "Upload Success!", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            btnSubmit.setEnabled(true);
-            btnSubmit.setText("Upload Now");
-            Toast.makeText(this, "Firebase Save Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+            selectedFileUri = null;
+            tvFileStatus.setText("No file selected");
         });
     }
 }
