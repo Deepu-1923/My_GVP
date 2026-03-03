@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import com.example.mygvp.admin.AdminLoginActivity;
 import com.example.mygvp.faculty.FacultyLoginActivity;
@@ -17,6 +18,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 public class MainActivity extends AppCompatActivity {
 
     private ExtendedFloatingActionButton fabLogin;
+    private CardView cardCampusMap, cardFacultyPresence, cardLatestEvents, cardGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,12 +26,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         fabLogin = findViewById(R.id.fabLogin);
+        cardCampusMap = findViewById(R.id.cardCampusMap);
+        cardFacultyPresence = findViewById(R.id.cardFacultyPresence);
+        cardLatestEvents = findViewById(R.id.cardLatestEvents);
+        cardGallery = findViewById(R.id.cardGallery);
 
         // Open Bottom Sheet on Click
         fabLogin.setOnClickListener(v -> showLoginBottomSheet());
 
-        // Note: You can also bind the GridLayout cards here and add basic
-        // Toast messages for the review to show they are "Coming Soon" or active.
+        // Setup listeners for showcase cards (Toasts for now, implement activities later)
+        cardCampusMap.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Campus Map feature coming soon", Toast.LENGTH_SHORT).show());
+        cardFacultyPresence.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Faculty Directory feature coming soon", Toast.LENGTH_SHORT).show());
+        cardLatestEvents.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Events feature coming soon", Toast.LENGTH_SHORT).show());
+        cardGallery.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Gallery feature coming soon", Toast.LENGTH_SHORT).show());
     }
 
     private void showLoginBottomSheet() {
