@@ -2,6 +2,7 @@ package com.example.mygvp.student;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,20 +17,24 @@ import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.mygvp.LostAndFoundActivity;
+import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
+import com.example.mygvp.UploadAchievementActivity;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.example.mygvp.UploadAchievementActivity;
 
 public class StudentDashboardActivity extends AppCompatActivity {
 
     private TextView tvName;
-    private ImageView imgProfile, imgSettings;
+    private ImageView imgProfile;
+    private FloatingActionButton imgSettings;
+    private CardView btnLogout;
 
     private CardView cardAttendance, cardFee, cardAchievement,
             cardResults, cardLostFound, cardSports;
@@ -46,6 +51,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         tvName = findViewById(R.id.tvName);
         imgProfile = findViewById(R.id.imgProfile);
         imgSettings = findViewById(R.id.imgSettings);
+        btnLogout = findViewById(R.id.btnLogout);
 
         cardAttendance = findViewById(R.id.cardAttendance);
         cardFee = findViewById(R.id.cardFee);
@@ -58,8 +64,12 @@ public class StudentDashboardActivity extends AppCompatActivity {
         rollNo = getIntent().getStringExtra("rollNo");
 
         if (rollNo == null || rollNo.isEmpty()) {
-            finish(); // Close if no roll number is found
-            return;
+            SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+            rollNo = prefs.getString("LOGGED_IN_ROLL_NO", null);
+            if (rollNo == null) {
+                finish();
+                return;
+            }
         }
 
         // Firebase reference to specific student
@@ -80,7 +90,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 String name = snapshot.child("name").getValue(String.class);
                 String imageUrl = snapshot.child("imageUrl").getValue(String.class);
 
-                tvName.setText(name != null ? "Welcome, " + name : "Welcome, Student");
+                tvName.setText(name != null ? name : "Student");
 
                 // Loading Profile Image with Glide
                 if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -90,21 +100,18 @@ public class StudentDashboardActivity extends AppCompatActivity {
                             .placeholder(R.drawable.ic_profile_placeholder)
                             .error(R.drawable.ic_profile_placeholder)
                             .into(imgProfile);
-                } else {
-                    imgProfile.setImageResource(R.drawable.ic_profile_placeholder);
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(StudentDashboardActivity.this, "Database Error", Toast.LENGTH_SHORT).show();
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void setupDashboardClicks() {
-        // When the Settings/Manage icon is clicked
         imgSettings.setOnClickListener(v -> showChangePasswordDialog());
+
+        btnLogout.setOnClickListener(v -> logoutUser());
 
         cardResults.setOnClickListener(v -> {
             Intent intent = new Intent(StudentDashboardActivity.this, StudentResultsActivity.class);
@@ -113,28 +120,25 @@ public class StudentDashboardActivity extends AppCompatActivity {
         });
 
         cardAchievement.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening Achievement Upload...", Toast.LENGTH_SHORT).show();
-
-            // Use the explicit Class name
-            Intent intent = new Intent(this, UploadAchievementActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, UploadAchievementActivity.class));
         });
 
         cardLostFound.setOnClickListener(v -> {
             startActivity(new Intent(StudentDashboardActivity.this, LostAndFoundActivity.class));
         });
 
-        cardAttendance.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening Attendance...", Toast.LENGTH_SHORT).show();
-        });
+        cardAttendance.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+        cardFee.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+        cardSports.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+    }
 
-        cardFee.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening Fee Payment...", Toast.LENGTH_SHORT).show();
-        });
-
-        cardSports.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening Sports...", Toast.LENGTH_SHORT).show();
-        });
+    private void logoutUser() {
+        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Intent intent = new Intent(StudentDashboardActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void showChangePasswordDialog() {
@@ -143,7 +147,6 @@ public class StudentDashboardActivity extends AppCompatActivity {
         View dialogView = inflater.inflate(R.layout.dialog_change_password, null);
         builder.setView(dialogView);
 
-        // Initialize dialog views
         TextInputEditText etOldPass = dialogView.findViewById(R.id.etOldPassword);
         TextInputEditText etNewPass = dialogView.findViewById(R.id.etNewPassword);
         MaterialButton btnUpdate = dialogView.findViewById(R.id.btnConfirmUpdate);
@@ -158,35 +161,25 @@ public class StudentDashboardActivity extends AppCompatActivity {
             String newP = etNewPass.getText().toString().trim();
 
             if (oldP.isEmpty() || newP.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Verify old password from Firebase
             studentRef.child("password").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String currentDBPass = snapshot.getValue(String.class);
-
-                    if (oldP.equals(currentDBPass)) {
-                        // Update to new password
-                        studentRef.child("password").setValue(newP)
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(StudentDashboardActivity.this, "Password Updated!", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                });
+                    if (oldP.equals(snapshot.getValue(String.class))) {
+                        studentRef.child("password").setValue(newP).addOnSuccessListener(aVoid -> {
+                            Toast.makeText(StudentDashboardActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        });
                     } else {
-                        etOldPass.setError("Incorrect old password");
+                        etOldPass.setError("Wrong password");
                     }
                 }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(StudentDashboardActivity.this, "Update Failed", Toast.LENGTH_SHORT).show();
-                }
+                @Override public void onCancelled(@NonNull DatabaseError error) {}
             });
         });
-
         dialog.show();
     }
 }

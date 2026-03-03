@@ -53,13 +53,11 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
 
         holder.tvItemTitle.setText(item.getTitle());
         holder.tvItemStatus.setText(item.getStatus());
-        holder.tvUploaderName.setText("by " + item.getUploaderName() + " (" + item.getUploaderRoll() + ")");
+        holder.tvUploaderName.setText("by " + item.getUploaderName());
 
         CharSequence timeAgo = android.text.format.DateUtils.getRelativeTimeSpanString(
                 item.getTimestamp(), System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS);
-        holder.tvTimestamp.setText("• " + timeAgo);
-
-        holder.tvItemMessage.setText(item.getMessage());
+        holder.tvTimestamp.setText(timeAgo);
 
         Glide.with(context).load(item.getImageUrl()).placeholder(android.R.drawable.ic_menu_camera).into(holder.ivItemPhoto);
 
@@ -69,27 +67,21 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
         String myRoll = prefs.getString("LOGGED_IN_ROLL_NO", "");
 
         if (item.getStatus().equals("RESOLVED") || item.getStatus().equals("CLAIMED")) {
-            holder.tvItemStatus.setTextColor(Color.parseColor("#1B5E20"));
-            holder.tvItemStatus.setBackgroundColor(Color.parseColor("#C8E6C9"));
+            holder.tvItemStatus.setTextColor(context.getColor(R.color.success));
             holder.btnAction.setVisibility(View.GONE);
-            holder.btnEdit.setVisibility(View.GONE); // Hide edit if resolved
+            holder.btnEdit.setVisibility(View.GONE);
         } else {
             if(item.getStatus().equals("LOST")) {
-                holder.tvItemStatus.setTextColor(Color.parseColor("#B71C1C"));
-                holder.tvItemStatus.setBackgroundColor(Color.parseColor("#FFCDD2"));
+                holder.tvItemStatus.setTextColor(context.getColor(R.color.error));
             } else {
-                holder.tvItemStatus.setTextColor(Color.parseColor("#E65100"));
-                holder.tvItemStatus.setBackgroundColor(Color.parseColor("#FFE0B2"));
+                holder.tvItemStatus.setTextColor(context.getColor(R.color.warning));
             }
             holder.btnAction.setVisibility(View.VISIBLE);
 
-            // OP?
             if (myRoll.equals(item.getUploaderRoll())) {
-                holder.btnEdit.setVisibility(View.VISIBLE); // Show Edit!
+                holder.btnEdit.setVisibility(View.VISIBLE);
                 holder.btnAction.setText("Resolve");
-
                 holder.btnEdit.setOnClickListener(v -> editListener.onEditClick(item));
-
                 holder.btnAction.setOnClickListener(v -> {
                     String newStatus = item.getStatus().equals("LOST") ? "RESOLVED" : "CLAIMED";
                     FirebaseDatabase.getInstance().getReference("LostAndFound").child(item.getId())
@@ -97,7 +89,7 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
                             .addOnSuccessListener(aVoid -> Toast.makeText(context, "Resolved!", Toast.LENGTH_SHORT).show());
                 });
             } else {
-                holder.btnEdit.setVisibility(View.GONE); // Hide Edit!
+                holder.btnEdit.setVisibility(View.GONE);
                 holder.btnAction.setText("Contact");
                 holder.btnAction.setOnClickListener(v -> showContactDialog(context, item.getUploaderRoll(), item.getTitle()));
             }
@@ -112,15 +104,13 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
         ImageView ivZoomedImage = dialog.findViewById(R.id.ivZoomedImage);
         ImageButton btnCloseZoom = dialog.findViewById(R.id.btnCloseZoom);
 
-        // to natively round the corners of the image using Glide!
         Glide.with(context)
                 .load(imageUrl)
-                .transform(new com.bumptech.glide.load.resource.bitmap.RoundedCorners(48)) // 48 is the curve amount
+                .transform(new com.bumptech.glide.load.resource.bitmap.RoundedCorners(48))
                 .into(ivZoomedImage);
 
         btnCloseZoom.setOnClickListener(v -> dialog.dismiss());
         ivZoomedImage.setOnClickListener(v -> dialog.dismiss());
-
         dialog.show();
     }
 
@@ -174,7 +164,7 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
     }
 
     public static class LostItemViewHolder extends RecyclerView.ViewHolder {
-        TextView tvItemTitle, tvItemStatus, tvUploaderName, tvItemMessage, tvTimestamp;
+        TextView tvItemTitle, tvItemStatus, tvUploaderName, tvTimestamp;
         ImageView ivItemPhoto;
         Button btnAction;
         ImageButton btnEdit;
@@ -184,7 +174,6 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
             tvItemTitle = itemView.findViewById(R.id.tvItemTitle);
             tvItemStatus = itemView.findViewById(R.id.tvItemStatus);
             tvUploaderName = itemView.findViewById(R.id.tvUploaderName);
-            tvItemMessage = itemView.findViewById(R.id.tvItemMessage);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             ivItemPhoto = itemView.findViewById(R.id.ivItemPhoto);
             btnAction = itemView.findViewById(R.id.btnAction);

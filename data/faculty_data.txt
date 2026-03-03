@@ -1,0 +1,158 @@
+List of Faculty Members
+
+        	Name-Designation-Qualification	   Area-of-Specialization	E-mail	Unique ID	Date of Joining	Nature-of-Association
+	Prof. D. Saritha
+Professor
+B.E, M.Tech	Databases & Data Mining	sarithad@gvpcdpgc.edu.in
+
+Profile	1-471749193	
+01-07-1995
+Exp: 30 years 8 months
+
+Regular
+	Dr.G.R.S Murthy
+Professor & H.O.D (CSE)
+M.Tech,Ph.D	Computer Vision	murthy.grs@gvpcdpgc.edu.in
+
+Profile	1-4144533476	
+27-04-2021
+Exp: 4 years 10 months
+
+Regular
+	Dr. Bh. Padma
+Professor
+M.Tech ,Ph.D
+Cryptography and Network Security	padmabh@gvpcdpgc.edu.in
+
+Profile	1-471938245	
+22-08-2005
+Exp: 20 years 6 months
+
+Regular
+	Dr. D Chandravathi
+Associate Professor
+M.Tech,Ph.D
+Cloud Security	chandravathid@gvpcdpgc.edu.in
+
+Profile	1-471938249	
+30-09-2022
+Exp: 3 years 5 months
+
+Regular
+	Sri. G. Kalyan Chakravarthi
+Assistant Professor,
+B. Tech, M. Tech
+Computer Science & Technology	gkalyan@gvpcdpgc.edu.in
+
+Profile	1-3293258677	
+25-11-2016
+Exp: 9 years 3 months
+
+Regular
+	Sri R.Kanaka Raju
+Assistant Professor,
+M.Tech	BIG DATA	rkanakaraju@gvpcdpgc.edu.in
+
+Profile	1-43432129663	
+15-12-2022
+Exp: 3 years 2 months
+
+Regular
+	Smt L.Pratibha
+Assistant Professor,
+M.C.A., M.Tech.	MACHINE LEARNING	pratibha@gvpcdpgc.edu.in
+
+Profile	1-43431573757	
+15-04-2023
+Exp: 2 years 10 months
+
+Regular
+	Mr. M. Anil
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Engineering	anilmeka@gvpcdpgc.edu.in
+
+Profile	1-5035263842	
+05-01-2022
+Exp: 4 years 1 month
+
+Regular
+	Mr. S. Arun Kumar
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Technology	arunkumar@gvpcdpgc.edu.in
+
+Profile	1-43428601613	
+15-12-2022
+Exp: 3 years 2 months
+
+Regular
+	Sri T.Sri Krishna
+Assistant Professor,
+M. Tech	ARTIFICIAL INTELLIGENCE & EMBEDDED SYSTEMS	srikrishna@gvpcdpgc.edu.in
+
+Profile	1-7615302452	
+04-09-2024
+Exp: 1 year 5 months
+
+Regular
+	Ms.C Aparna
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Technology	aparna@gvpcdpgc.edu.in
+
+Profile	1-44730672722	
+03-09-2024
+Exp: 1 year 6 months
+
+Regular
+	Mrs. B Gnaneshwari Devi
+Assistant Professor,
+B. Tech, M. Tech	Software Engineering	gnanee@gvpcdpgc.edu.in
+
+Profile	
+04-08-2025
+Exp: 0 years 6 months
+
+Regular
+	Ms.Vaishna C Bhanu
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Technology	vaishnacbhanu@gvpcdpgc.edu.in
+
+Profile	
+04-08-2025
+Exp: 0 years 6 months
+
+Regular
+	Mrs.M V G Sirisha
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Technology	sirisha2025@gvpcdpgc.edu.in
+
+Profile	
+04-08-2025
+Exp: 0 years 6 months
+
+Regular
+	Mr.Bharat Kumar Jagana
+Assistant Professor,
+B. Tech, M. Tech	Computer Science and Technology	aparna@gvpcdpgc.edu.in
+
+Profile	
+19-08-2025
+Exp: 0 years 6 months
+
+Regular
+	Mrs.N Sai Susmitha Naidu
+Assistant Professor,
+B. Tech, M. Tech	Machine Learning	sushmita.n@gvpcdpgc.edu.in
+
+Profile	
+25-08-2025
+Exp: 0 years 6 months
+
+Regular
+
+Technical Staff
+
+S.No	Name     	Designation
+1.	Mr. N Sairam Saran	Programmer
+2.	Mr. D. V. Murali Krishna	Network Administrator
+3.	Mr. A. S. S. V. Akhil	Lab Technician
+4.	Mr. G. Siva Sankar	Lab Technician

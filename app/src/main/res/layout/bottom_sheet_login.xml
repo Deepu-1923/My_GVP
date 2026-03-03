@@ -1,58 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:backgroundTint="#FFFFFF"
-    android:orientation="vertical"
-    android:padding="24dp"
-    app:behavior_hideable="true"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    app:cardCornerRadius="32dp"
+    app:cardElevation="0dp"
+    android:layout_marginBottom="-32dp"
+    app:contentPadding="24dp">
 
-    <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:background="#D0D0D0" />
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text="Select Login Portal"
-        android:textAlignment="center"
-        android:textColor="#2E2E2E"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:paddingBottom="48dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/bsBtnAdmin"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginBottom="12dp"
-        android:text="Admin Portal"
-        android:textColor="#000000"
-        app:backgroundTint="#C6B7E2"
-        app:cornerRadius="12dp" />
+        <View
+            android:layout_width="48dp"
+            android:layout_height="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp"
+            android:background="#E0E0E0" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/bsBtnFaculty"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginBottom="12dp"
-        android:text="Faculty Portal"
-        android:textColor="#000000"
-        app:backgroundTint="#C6B7E2"
-        app:cornerRadius="12dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose Your Portal"
+            android:textColor="#1A1A1A"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="8dp"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/bsBtnStudent"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Student Portal"
-        android:textColor="#000000"
-        app:backgroundTint="#C6B7E2"
-        app:cornerRadius="12dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select the appropriate access to continue."
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp"/>
 
-</LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/bsBtnAdmin"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginBottom="16dp"
+            android:text="Administrator"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            app:backgroundTint="#1A1A1A"
+            app:cornerRadius="20dp"
+            app:icon="@android:drawable/ic_lock_power_off"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconSize="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/bsBtnFaculty"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginBottom="16dp"
+            android:text="Faculty Member"
+            android:textAllCaps="false"
+            android:textColor="#1A1A1A"
+            android:textSize="18sp"
+            app:cornerRadius="20dp"
+            app:strokeColor="#1A1A1A"
+            app:strokeWidth="2dp"
+            app:icon="@android:drawable/ic_menu_myplaces"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconSize="24dp"
+            app:iconTint="#1A1A1A"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/bsBtnStudent"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:text="Student Portal"
+            android:textAllCaps="false"
+            android:textColor="#1A1A1A"
+            android:textSize="18sp"
+            app:cornerRadius="20dp"
+            app:strokeColor="#1A1A1A"
+            app:strokeWidth="2dp"
+            app:icon="@android:drawable/ic_menu_edit"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconSize="24dp"
+            app:iconTint="#1A1A1A"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

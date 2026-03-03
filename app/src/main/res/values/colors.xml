@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Primary theme colors -->
-    <color name="primary">#5E17EB</color>
-    <color name="primaryDark">#3E0FB3</color>
-    <color name="primaryLight">#E8DDFF</color>
+    <color name="primary">#1A1A1A</color>
+    <color name="primaryDark">#000000</color>
+    <color name="primaryLight">#424242</color>
 
-    <!-- Accent -->
-    <color name="accent">#FF4081</color>
+    <!-- Accent / Action Colors -->
+    <color name="accent">#5E17EB</color>
+    <color name="accent_light">#F3E5F5</color>
+
+    <!-- Status Colors -->
+    <color name="success">#34C759</color>
+    <color name="error">#FF3B30</color>
+    <color name="warning">#FF9500</color>
+    <color name="info">#007AFF</color>
 
     <!-- Backgrounds -->
-    <color name="background">#F6F6FA</color>
+    <color name="background">#F0F2F5</color>
     <color name="cardBackground">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
 
-    <!-- Text -->
-    <color name="textPrimary">#1F1F1F</color>
+    <!-- Text Colors -->
+    <color name="textPrimary">#1A1A1A</color>
     <color name="textSecondary">#666666</color>
-    <color name="hintText">#9E9E9E</color>
-    <color name="text_dark">#333333</color>
-    <color name="text_white">#FFFFFF</color>
-    <!-- Buttons -->
-    <color name="buttonText">#FFFFFF</color>
+    <color name="textTertiary">#9E9E9E</color>
+    <color name="textOnPrimary">#FFFFFF</color>
 
-    <color name="lavender">#C6B7E2</color>
-    <color name="lavender_dark">#A594D6</color>
-    <color name="lavender_light">#EDE7F6</color>
-
+    <!-- Utility Colors -->
+    <color name="divider">#EEEEEE</color>
+    <color name="ripple">#10000000</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="gray_input">#F3F3F3</color>
 
+    <!-- Legacy / Compatibility -->
+    <color name="lavender">#C6B7E2</color>
+    <color name="buttonText">#FFFFFF</color>
 </resources>
