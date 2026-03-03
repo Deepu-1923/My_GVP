@@ -12,21 +12,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
 
-        <!-- ADMIN FLOW -->
         <activity android:name=".admin.AdminLoginActivity"/>
         <activity android:name=".admin.AdminDashboardActivity"/>
 
-        <!-- FACULTY FLOW -->
         <activity android:name=".faculty.FacultyLoginActivity"/>
         <activity android:name=".faculty.FacultyDashboardActivity"/>
 
-        <!-- STUDENT FLOW -->
         <activity android:name=".student.StudentLoginActivity"/>
         <activity android:name=".student.StudentDashboardActivity"/>
         <activity android:name=".student.StudentResultsActivity"/>
         <activity android:name=".student.ForgotPasswordActivity" />
         <activity android:name=".UploadAchievementActivity" />
-        <!-- MAIN / LAUNCHER -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
