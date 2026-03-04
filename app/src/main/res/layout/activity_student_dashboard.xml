@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,10 +19,10 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardProfile"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
                 android:layout_centerVertical="true"
-                app:cardCornerRadius="28dp"
+                app:cardCornerRadius="36dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
@@ -61,22 +62,22 @@
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/btnLogout"
+                android:id="@+id/btnMenu"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:strokeColor="@color/error"
-                app:strokeWidth="1dp">
+                app:strokeWidth="0dp">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="12dp"
-                    android:src="@android:drawable/ic_lock_power_off"
-                    app:tint="@color/error" />
+                    android:src="@android:drawable/ic_menu_sort_by_size"
+                    app:tint="@color/textPrimary" />
             </com.google.android.material.card.MaterialCardView>
         </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -95,7 +96,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Stats Overview -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -160,7 +160,7 @@
                             android:id="@+id/tvResultStat"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="8.9"
+                            android:text="--"
                             android:textColor="@color/white"
                             android:textSize="28sp"
                             android:textStyle="bold" />
@@ -186,7 +186,6 @@
                 android:columnCount="2"
                 android:columnOrderPreserved="false">
 
-                <!-- Attendance Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardAttendance"
                     android:layout_width="0dp"
@@ -222,7 +221,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Fee Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardFee"
                     android:layout_width="0dp"
@@ -258,7 +256,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Achievement Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardAchievement"
                     android:layout_width="0dp"
@@ -294,7 +291,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Results Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardResults"
                     android:layout_width="0dp"
@@ -330,7 +326,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Lost & Found Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardLostFound"
                     android:layout_width="0dp"
@@ -366,7 +361,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Sports Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardSports"
                     android:layout_width="0dp"
@@ -405,17 +399,5 @@
             </GridLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/imgSettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:contentDescription="Settings"
-        android:src="@android:drawable/ic_menu_manage"
-        app:backgroundTint="@color/primary"
-        app:elevation="8dp"
-        app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

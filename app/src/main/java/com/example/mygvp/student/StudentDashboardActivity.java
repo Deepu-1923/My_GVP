@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +22,6 @@ import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
 import com.example.mygvp.UploadAchievementActivity;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,15 +32,15 @@ import com.google.firebase.database.ValueEventListener;
 public class StudentDashboardActivity extends AppCompatActivity {
 
     private TextView tvName;
+    private TextView tvResultStat;
     private ImageView imgProfile;
-    private FloatingActionButton imgSettings;
-    private CardView btnLogout;
+    private CardView btnMenu;
 
     private CardView cardAttendance, cardFee, cardAchievement,
             cardResults, cardLostFound, cardSports;
 
     private DatabaseReference studentRef;
-    private String rollNo;
+    private String rollNo, branch, batch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +49,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
 
         // UI references
         tvName = findViewById(R.id.tvName);
+        tvResultStat = findViewById(R.id.tvResultStat);
         imgProfile = findViewById(R.id.imgProfile);
-        imgSettings = findViewById(R.id.imgSettings);
-        btnLogout = findViewById(R.id.btnLogout);
+        btnMenu = findViewById(R.id.btnMenu);
 
         cardAttendance = findViewById(R.id.cardAttendance);
         cardFee = findViewById(R.id.cardFee);
@@ -60,58 +60,136 @@ public class StudentDashboardActivity extends AppCompatActivity {
         cardLostFound = findViewById(R.id.cardLostFound);
         cardSports = findViewById(R.id.cardSports);
 
-        // Get roll number from Intent
-        rollNo = getIntent().getStringExtra("rollNo");
+        // Pull stored credentials
+        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+        rollNo = prefs.getString("LOGGED_IN_ROLL_NO", "");
+        String studentName = prefs.getString("LOGGED_IN_NAME", "Student");
+        branch = prefs.getString("LOGGED_IN_BRANCH", "");
+        batch = prefs.getString("LOGGED_IN_BATCH", "");
 
-        if (rollNo == null || rollNo.isEmpty()) {
-            SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
-            rollNo = prefs.getString("LOGGED_IN_ROLL_NO", null);
-            if (rollNo == null) {
-                finish();
-                return;
-            }
+        if (rollNo.isEmpty() || branch.isEmpty() || batch.isEmpty()) {
+            Toast.makeText(this, "Session expired, please login again.", Toast.LENGTH_SHORT).show();
+            logoutUser();
+            return;
         }
 
-        // Firebase reference to specific student
+        // Set the name IMMEDIATELY from what we saved during login
+        tvName.setText(studentName);
+
+        // Correct Firebase path: students > CSE > 2025-29 > 5251411001
         studentRef = FirebaseDatabase.getInstance()
                 .getReference("students")
+                .child(branch)
+                .child(batch)
                 .child(rollNo);
 
         loadStudentProfile();
+        loadLatestCGPA();
         setupDashboardClicks();
     }
 
+    // --- UPDATED CLOUDINARY LOGIC ---
     private void loadStudentProfile() {
-        studentRef.addValueEventListener(new ValueEventListener() {
+        String cloudName = "dlw4oisub";
+        String transformations = "w_300,h_300,c_fill,q_auto,f_auto";
+
+        // REMOVED the "/images/" part to match your exact Cloudinary folders!
+        String cloudinaryUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/" + transformations + "/students/" + branch + "/" + batch + "/" + rollNo + ".jpg";
+
+        // Optional: Let's pop up a Toast just to prove the URL is correct when you run it
+        Toast.makeText(this, "Trying to load: " + rollNo + ".jpg", Toast.LENGTH_SHORT).show();
+
+        Glide.with(StudentDashboardActivity.this)
+                .load(cloudinaryUrl)
+                .apply(RequestOptions.circleCropTransform())
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .error(R.drawable.ic_profile_placeholder)
+                .into(imgProfile);
+    }
+
+    // --- FETCH LATEST CGPA LOGIC ---
+    private void loadLatestCGPA() {
+        studentRef.child("results").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) return;
+                if (!snapshot.exists()) {
+                    tvResultStat.setText("--");
+                    return;
+                }
 
-                String name = snapshot.child("name").getValue(String.class);
-                String imageUrl = snapshot.child("imageUrl").getValue(String.class);
+                int maxYear = -1;
+                DataSnapshot latestYearSnapshot = null;
 
-                tvName.setText(name != null ? name : "Student");
+                // Step 1: Find the highest year (1, 2, 3, or 4)
+                for (DataSnapshot yearSnap : snapshot.getChildren()) {
+                    try {
+                        int year = Integer.parseInt(yearSnap.getKey());
+                        if (year > maxYear) {
+                            maxYear = year;
+                            latestYearSnapshot = yearSnap;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore any non-numeric nodes if they exist
+                    }
+                }
 
-                // Loading Profile Image with Glide
-                if (imageUrl != null && !imageUrl.isEmpty()) {
-                    Glide.with(StudentDashboardActivity.this)
-                            .load(imageUrl)
-                            .apply(RequestOptions.circleCropTransform())
-                            .placeholder(R.drawable.ic_profile_placeholder)
-                            .error(R.drawable.ic_profile_placeholder)
-                            .into(imgProfile);
+                if (latestYearSnapshot != null) {
+                    int maxSemester = -1;
+                    DataSnapshot latestSemesterSnapshot = null;
+
+                    // Step 2: Inside that highest year, find the highest semester (1 or 2)
+                    for (DataSnapshot semSnap : latestYearSnapshot.getChildren()) {
+                        try {
+                            int sem = Integer.parseInt(semSnap.getKey());
+                            if (sem > maxSemester) {
+                                maxSemester = sem;
+                                latestSemesterSnapshot = semSnap;
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+
+                    // Step 3: Extract the CGPA from that latest semester node
+                    if (latestSemesterSnapshot != null) {
+                        Object cgpaObj = latestSemesterSnapshot.child("cgpa").getValue();
+                        if (cgpaObj != null) {
+                            tvResultStat.setText(String.valueOf(cgpaObj));
+                        } else {
+                            tvResultStat.setText("--");
+                        }
+                    } else {
+                        tvResultStat.setText("--");
+                    }
+                } else {
+                    tvResultStat.setText("--");
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) {
+                tvResultStat.setText("--");
+            }
         });
     }
 
     private void setupDashboardClicks() {
-        imgSettings.setOnClickListener(v -> showChangePasswordDialog());
+        // Pop-up menu for the Hamburger icon
+        btnMenu.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(StudentDashboardActivity.this, btnMenu);
+            popupMenu.getMenu().add("Change Password");
+            popupMenu.getMenu().add("Logout");
 
-        btnLogout.setOnClickListener(v -> logoutUser());
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getTitle().equals("Change Password")) {
+                    showChangePasswordDialog();
+                } else if (item.getTitle().equals("Logout")) {
+                    logoutUser();
+                }
+                return true;
+            });
+            popupMenu.show();
+        });
 
         cardResults.setOnClickListener(v -> {
             Intent intent = new Intent(StudentDashboardActivity.this, StudentResultsActivity.class);
