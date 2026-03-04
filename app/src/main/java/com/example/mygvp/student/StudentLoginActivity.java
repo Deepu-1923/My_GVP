@@ -54,37 +54,58 @@ public class StudentLoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean isFound = false;
 
-                for (DataSnapshot studentSnap : snapshot.getChildren()) {
-                    String dbEmail = studentSnap.child("email").getValue(String.class);
-                    String dbPassword = studentSnap.child("password").getValue(String.class);
+                // 1st Loop: Branches (e.g., CSE)
+                for (DataSnapshot branchSnap : snapshot.getChildren()) {
 
-                    if (dbEmail != null && dbPassword != null &&
-                            email.equals(dbEmail) && password.equals(dbPassword)) {
+                    // 2nd Loop: Batches (e.g., 2025-29)
+                    for (DataSnapshot batchSnap : branchSnap.getChildren()) {
 
-                        String rollNo = studentSnap.getKey();
-                        String studentName = studentSnap.child("name").getValue(String.class);
-                        if (studentName == null || studentName.isEmpty()) {
-                            studentName = "Student";
+                        // 3rd Loop: Student IDs (e.g., 5251411001)
+                        for (DataSnapshot studentSnap : batchSnap.getChildren()) {
+
+                            String dbEmail = studentSnap.child("email").getValue(String.class);
+                            String dbPassword = studentSnap.child("password").getValue(String.class);
+
+                            // Using .trim() prevents accidental spaces in database from ruining the login
+                            if (dbEmail != null && dbPassword != null &&
+                                    email.equalsIgnoreCase(dbEmail.trim()) && password.equals(dbPassword.trim())) {
+
+                                String rollNo = studentSnap.getKey();
+                                String studentName = studentSnap.child("name").getValue(String.class);
+                                String branch = studentSnap.child("branch").getValue(String.class);
+                                String batch = studentSnap.child("batch").getValue(String.class);
+
+                                // Format the name to Title Case so your dashboard doesn't just say "Student"
+                                if (studentName == null || studentName.isEmpty()) {
+                                    studentName = "Student";
+                                } else {
+                                    studentName = toTitleCase(studentName);
+                                }
+
+                                // Save Session in SharedPreferences
+                                SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putString("LOGGED_IN_ROLL_NO", rollNo);
+                                editor.putString("LOGGED_IN_NAME", studentName);
+                                editor.putString("LOGGED_IN_BRANCH", branch);
+                                editor.putString("LOGGED_IN_BATCH", batch);
+                                editor.apply();
+
+                                Toast.makeText(StudentLoginActivity.this, "Hello,\n" + studentName, Toast.LENGTH_SHORT).show();
+
+                                // Navigate to Dashboard
+                                Intent intent = new Intent(StudentLoginActivity.this, StudentDashboardActivity.class);
+                                intent.putExtra("rollNo", rollNo);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+
+                                isFound = true;
+                                break; // Breaks student loop
+                            }
                         }
-
-                        // Save Session in SharedPreferences
-                        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("LOGGED_IN_ROLL_NO", rollNo);
-                        editor.putString("LOGGED_IN_NAME", studentName);
-                        editor.apply();
-
-                        Toast.makeText(StudentLoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-
-                        // Navigate to Dashboard
-                        Intent intent = new Intent(StudentLoginActivity.this, StudentDashboardActivity.class);
-                        intent.putExtra("rollNo", rollNo);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-
-                        isFound = true;
-                        break;
+                        if (isFound) break; // Breaks batch loop
                     }
+                    if (isFound) break; // Breaks branch loop
                 }
 
                 if (!isFound) {
@@ -97,5 +118,28 @@ public class StudentLoginActivity extends AppCompatActivity {
                 Toast.makeText(StudentLoginActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // Helper method to convert "ABDUL SADIYA TASLIM" to "Abdul Sadiya Taslim"
+    private String toTitleCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        StringBuilder titleCase = new StringBuilder();
+        boolean nextTitleCase = true;
+
+        for (char c : input.toCharArray()) {
+            if (Character.isSpaceChar(c)) {
+                nextTitleCase = true;
+            } else if (nextTitleCase) {
+                c = Character.toTitleCase(c);
+                nextTitleCase = false;
+            } else {
+                c = Character.toLowerCase(c);
+            }
+            titleCase.append(c);
+        }
+        return titleCase.toString();
     }
 }

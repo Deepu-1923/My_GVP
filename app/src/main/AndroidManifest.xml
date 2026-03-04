@@ -24,7 +24,7 @@
         <activity android:name=".student.StudentDashboardActivity"/>
         <activity android:name=".student.StudentResultsActivity"/>
         <activity android:name=".student.ForgotPasswordActivity" />
-        <activity android:name=".UploadAchievementActivity" />
+        <activity android:name="UploadAchievementActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
