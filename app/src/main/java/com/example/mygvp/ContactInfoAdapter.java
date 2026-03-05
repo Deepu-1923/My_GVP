@@ -3,6 +3,7 @@ package com.example.mygvp;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,20 +29,23 @@ public class ContactInfoAdapter extends RecyclerView.Adapter<ContactInfoAdapter.
         ContactInfo item = infoList.get(position % infoList.size());
         holder.tvTitle.setText(item.getTitle());
         holder.tvContent.setText(item.getContent());
+        holder.ivIcon.setImageResource(item.getIconResId());
     }
 
     @Override
     public int getItemCount() {
-        return Integer.MAX_VALUE; // For infinite loop effect
+        return infoList.isEmpty() ? 0 : Integer.MAX_VALUE; // For infinite loop effect
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvContent;
+        ImageView ivIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvInfoTitle);
             tvContent = itemView.findViewById(R.id.tvInfoContent);
+            ivIcon = itemView.findViewById(R.id.ivInfoIcon);
         }
     }
 }

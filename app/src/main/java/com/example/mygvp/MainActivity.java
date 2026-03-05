@@ -109,7 +109,14 @@ public class MainActivity extends AppCompatActivity {
         rvSyllabus.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvSyllabus.setAdapter(new GalleryAdapter(syllabusGraphics));
         
-        findViewById(R.id.miniSyllabus).setOnClickListener(v -> showSyllabusBottomSheet());
+        // Enable click interceptor ONLY for Syllabus card to allow scrolling on others
+        View syllabusClicker = findViewById(R.id.miniSyllabus).findViewById(R.id.vClickInterceptor);
+        if (syllabusClicker != null) {
+            syllabusClicker.setClickable(true);
+            syllabusClicker.setFocusable(true);
+            syllabusClicker.setBackgroundResource(android.R.drawable.list_selector_background);
+            syllabusClicker.setOnClickListener(v -> showSyllabusBottomSheet());
+        }
     }
 
     private void setupMiniHeader(View card, String title) {
@@ -134,9 +141,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupContactInfo() {
         List<ContactInfo> infoList = new ArrayList<>();
-        infoList.add(new ContactInfo("📍 Address", "Gayatri Vidya Parishad College, Rushikonda, Visakhapatnam-530045."));
-        infoList.add(new ContactInfo("📧 Email", "principalgvpcdpgca@gmail.com"));
-        infoList.add(new ContactInfo("📞 Contact", "0891-2783722 / 2955084"));
+        infoList.add(new ContactInfo("📍 Address", "Gayatri Vidya Parishad College, Rushikonda, Visakhapatnam-530045.", android.R.drawable.ic_dialog_map));
+        infoList.add(new ContactInfo("📧 Email", "principalgvpcdpgca@gmail.com", android.R.drawable.ic_dialog_email));
+        infoList.add(new ContactInfo("📞 Contact", "0891-2783722 / 2955084", android.R.drawable.ic_menu_call));
         
         rvContactInfo.setLayoutManager(new LinearLayoutManager(this));
         rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
