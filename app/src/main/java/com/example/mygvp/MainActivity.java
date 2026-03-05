@@ -2,12 +2,18 @@ package com.example.mygvp;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.Window;
-import android.widget.ImageView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,17 +25,24 @@ import com.example.mygvp.faculty.FacultyLoginActivity;
 import com.example.mygvp.student.StudentLoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ExtendedFloatingActionButton fabLogin;
-    private RecyclerView rvFaculty, rvCampus, rvEvents;
     private final Handler autoScrollHandler = new Handler(Looper.getMainLooper());
-    private static final int AUTO_SCROLL_DELAY = 2000;
+    private static final int AUTO_SCROLL_DELAY = 3000;
+    private DatabaseReference dbRef;
+
+    private RecyclerView rvCampus, rvFaculty, rvAdmin, rvSyllabus, rvContactInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         window.setStatusBarColor(Color.TRANSPARENT);
 
         setContentView(R.layout.activity_main);
+        dbRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -47,83 +61,177 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        fabLogin = findViewById(R.id.fabLogin);
-        rvFaculty = findViewById(R.id.rvFaculty);
-        rvCampus = findViewById(R.id.rvCampus);
-        rvEvents = findViewById(R.id.rvEvents);
-
-        setupCampusGallery();
-        setupEventsGallery();
-        setupFacultyList();
-
-        fabLogin.setOnClickListener(v -> showLoginBottomSheet());
+        initViews();
+        setupMiniCards();
+        setupContactInfo();
+        
+        findViewById(R.id.btnProfile).setOnClickListener(v -> showLoginBottomSheet());
+        findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
         
         startAutoScroll();
     }
 
-    private void setupCampusGallery() {
-        List<GalleryItem> items = new ArrayList<>();
-        items.add(new GalleryItem("Main Entrance", "clg_img"));
-        items.add(new GalleryItem("Academic Block", "clg_img"));
-        items.add(new GalleryItem("Central Library", "clg_img"));
-        
+    private void initViews() {
+        rvCampus = findViewById(R.id.miniCampus).findViewById(R.id.rvMiniContent);
+        rvFaculty = findViewById(R.id.miniFaculty).findViewById(R.id.rvMiniContent);
+        rvAdmin = findViewById(R.id.miniAdmin).findViewById(R.id.rvMiniContent);
+        rvSyllabus = findViewById(R.id.miniSyllabus).findViewById(R.id.rvMiniContent);
+        rvContactInfo = findViewById(R.id.rvContactInfo);
+    }
+
+    private void setupMiniCards() {
+        // 1. Campus Mini
+        setupMiniHeader(findViewById(R.id.miniCampus), "Explore Campus");
+        List<GalleryItem> campusItems = new ArrayList<>();
+        campusItems.add(new GalleryItem("Campus", "clg_img"));
+        campusItems.add(new GalleryItem("Entrance", "clg_img"));
         rvCampus.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvCampus.setAdapter(new GalleryAdapter(items));
+        rvCampus.setAdapter(new GalleryAdapter(campusItems));
         new PagerSnapHelper().attachToRecyclerView(rvCampus);
-    }
 
-    private void setupEventsGallery() {
-        List<GalleryItem> items = new ArrayList<>();
-        items.add(new GalleryItem("Tech Fest 2024", "clg_img"));
-        items.add(new GalleryItem("Sports Meet", "ic_sports"));
-        items.add(new GalleryItem("Cultural Night", "clg_img"));
-        
-        rvEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvEvents.setAdapter(new GalleryAdapter(items));
-        new PagerSnapHelper().attachToRecyclerView(rvEvents);
-    }
-
-    private void setupFacultyList() {
-        List<Faculty> facultyList = new ArrayList<>();
-        facultyList.add(new Faculty("Prof. D. Saritha", "Professor", "sarithad@gvpcdpgc.edu.in", "saritha"));
-        facultyList.add(new Faculty("Dr.G.R.S Murthy", "Professor & H.O.D (CSE)", "murthy.grs@gvpcdpgc.edu.in", "dr_grs_murthy"));
-        facultyList.add(new Faculty("Dr. Bh. Padma", "Professor", "padmabh@gvpcdpgc.edu.in", "padma"));
-        facultyList.add(new Faculty("Dr. D Chandravathi", "Associate Professor", "chandravathid@gvpcdpgc.edu.in", "smt_d_chandravati"));
-        facultyList.add(new Faculty("Sri. G. Kalyan Chakravarthi", "Assistant Professor", "gkalyan@gvpcdpgc.edu.in", "kalyan_chakravarthy_1"));
-        facultyList.add(new Faculty("Sri R.Kanaka Raju", "Assistant Professor", "rkanakaraju@gvpcdpgc.edu.in", "r_kanaka_raju"));
-        facultyList.add(new Faculty("Smt L.Pratibha", "Assistant Professor", "pratibha@gvpcdpgc.edu.in", "ic_profile_placeholder"));
-        facultyList.add(new Faculty("Mr. M. Anil", "Assistant Professor", "anilmeka@gvpcdpgc.edu.in", "anil"));
-        facultyList.add(new Faculty("Mr. S. Arun Kumar", "Assistant Professor", "arunkumar@gvpcdpgc.edu.in", "arun_kumar"));
-        facultyList.add(new Faculty("Sri T.Sri Krishna", "Assistant Professor", "srikrishna@gvpcdpgc.edu.in", "mr_t_sri_krishna"));
-        facultyList.add(new Faculty("Ms.C Aparna", "Assistant Professor", "aparna@gvpcdpgc.edu.in", "c_aparna"));
-        facultyList.add(new Faculty("Ms.Vaishna C Bhanu", "Assistant Professor", "vaishnacbhanu@gvpcdpgc.edu.in", "vaishnacbhanu"));
-        facultyList.add(new Faculty("Mrs.M V G Sirisha", "Assistant Professor", "sirisha2025@gvpcdpgc.edu.in", "sirisha_photo"));
-        facultyList.add(new Faculty("Mr.Bharat Kumar Jagana", "Assistant Professor", "aparna@gvpcdpgc.edu.in", "bharat_kumar"));
-        facultyList.add(new Faculty("Mrs.N Sai Susmitha Naidu", "Assistant Professor", "sushmita.n@gvpcdpgc.edu.in", "sushmitha_naidu"));
-        
+        // 2. Faculty Mini
+        setupMiniHeader(findViewById(R.id.miniFaculty), "Faculty");
+        List<Faculty> facultyList = getFacultyData();
         rvFaculty.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvFaculty.setAdapter(new FacultyAdapter(facultyList));
-        new PagerSnapHelper().attachToRecyclerView(rvFaculty);
+        rvFaculty.setAdapter(new HorizontalFacultyAdapter(facultyList));
+
+        // 3. Admin Mini
+        setupMiniHeader(findViewById(R.id.miniAdmin), "Administrative");
+        List<Faculty> adminList = getAdminData();
+        rvAdmin.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvAdmin.setAdapter(new HorizontalFacultyAdapter(adminList));
+
+        // 4. Syllabus Mini
+        setupMiniHeader(findViewById(R.id.miniSyllabus), "Syllabus");
+        List<GalleryItem> syllabusGraphics = new ArrayList<>();
+        syllabusGraphics.add(new GalleryItem("R22", "ic_results"));
+        syllabusGraphics.add(new GalleryItem("Calendar", "ic_attendance"));
+        rvSyllabus.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvSyllabus.setAdapter(new GalleryAdapter(syllabusGraphics));
+        
+        findViewById(R.id.miniSyllabus).setOnClickListener(v -> showSyllabusBottomSheet());
+    }
+
+    private void setupMiniHeader(View card, String title) {
+        TextView tv = card.findViewById(R.id.tvMiniTitle);
+        tv.setText(title);
+    }
+
+    private List<Faculty> getFacultyData() {
+        List<Faculty> list = new ArrayList<>();
+        list.add(new Faculty("Dr. G.R.S Murthy", "H.O.D (CSE)", "murthy.grs@gvpcdpgc.edu.in", "dr_grs_murthy"));
+        list.add(new Faculty("Sri R.Kanaka Raju", "Assistant Professor", "rkanakaraju@gvpcdpgc.edu.in", "r_kanaka_raju"));
+        list.add(new Faculty("Mr. M. Anil", "Assistant Professor", "anilmeka@gvpcdpgc.edu.in", "anil"));
+        return list;
+    }
+
+    private List<Faculty> getAdminData() {
+        List<Faculty> list = new ArrayList<>();
+        list.add(new Faculty("Prof. D. Saritha", "Dean", "sarithad@gvpcdpgc.edu.in", "saritha"));
+        list.add(new Faculty("Dr. Bh. Padma", "Professor", "padmabh@gvpcdpgc.edu.in", "padma"));
+        return list;
+    }
+
+    private void setupContactInfo() {
+        List<ContactInfo> infoList = new ArrayList<>();
+        infoList.add(new ContactInfo("📍 Address", "Gayatri Vidya Parishad College, Rushikonda, Visakhapatnam-530045."));
+        infoList.add(new ContactInfo("📧 Email", "principalgvpcdpgca@gmail.com"));
+        infoList.add(new ContactInfo("📞 Contact", "0891-2783722 / 2955084"));
+        
+        rvContactInfo.setLayoutManager(new LinearLayoutManager(this));
+        rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
+    }
+
+    private void showSyllabusBottomSheet() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_syllabus, null);
+        dialog.setContentView(view);
+
+        AutoCompleteTextView spinnerYear = view.findViewById(R.id.spinnerYear);
+        AutoCompleteTextView spinnerSem = view.findViewById(R.id.spinnerSem);
+        ChipGroup chipGroupBranch = view.findViewById(R.id.chipGroupBranch);
+        MaterialButton btnDownload = view.findViewById(R.id.btnDownloadSyllabus);
+        MaterialButton btnCalendar = view.findViewById(R.id.btnDownloadCalendar);
+
+        String[] years = {"1st Year", "2nd Year", "3rd Year", "4th Year"};
+        String[] sems = {"Semester 1", "Semester 2"};
+
+        spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, years));
+        spinnerSem.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sems));
+
+        View.OnClickListener updateVisibility = v -> {
+            if (!spinnerYear.getText().toString().isEmpty() && !spinnerSem.getText().toString().isEmpty()) {
+                chipGroupBranch.setVisibility(View.VISIBLE);
+            }
+        };
+
+        spinnerYear.setOnItemClickListener((parent, v1, position, id) -> updateVisibility.onClick(null));
+        spinnerSem.setOnItemClickListener((parent, v1, position, id) -> updateVisibility.onClick(null));
+
+        chipGroupBranch.setOnCheckedStateChangeListener((group, checkedIds) -> btnDownload.setEnabled(!checkedIds.isEmpty()));
+
+        btnDownload.setOnClickListener(v -> {
+            int checkedId = chipGroupBranch.getCheckedChipId();
+            if (checkedId != View.NO_ID) {
+                Chip chip = view.findViewById(checkedId);
+                String branch = chip.getText().toString();
+                String year = spinnerYear.getText().toString();
+                String sem = spinnerSem.getText().toString();
+                fetchAndOpenUrl("syllabus/" + year + "/" + sem + "/" + branch);
+                dialog.dismiss();
+            }
+        });
+
+        btnCalendar.setOnClickListener(v -> {
+            fetchAndOpenUrl("academic_calendar/2025-26");
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void fetchAndOpenUrl(String path) {
+        dbRef.child(path).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String url = snapshot.getValue(String.class);
+                if (url != null && !url.isEmpty()) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                } else {
+                    Toast.makeText(MainActivity.this, "File not available yet.", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void startAutoScroll() {
         Runnable scrollRunnable = new Runnable() {
             @Override
             public void run() {
-                autoScrollRecyclerView(rvCampus);
-                autoScrollRecyclerView(rvEvents);
-                autoScrollRecyclerView(rvFaculty);
+                autoScroll(rvCampus);
+                autoScroll(rvFaculty);
+                autoScroll(rvAdmin);
+                autoScroll(rvSyllabus);
+                autoScrollVertical(rvContactInfo);
                 autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
             }
         };
         autoScrollHandler.postDelayed(scrollRunnable, AUTO_SCROLL_DELAY);
     }
 
-    private void autoScrollRecyclerView(RecyclerView rv) {
-        if (rv.getAdapter() == null || rv.getLayoutManager() == null) return;
+    private void autoScroll(RecyclerView rv) {
+        if (rv == null || rv.getAdapter() == null || rv.getLayoutManager() == null) return;
         int currentPos = ((LinearLayoutManager) rv.getLayoutManager()).findFirstVisibleItemPosition();
         int nextPos = (currentPos + 1) % rv.getAdapter().getItemCount();
         rv.smoothScrollToPosition(nextPos);
+    }
+
+    private void autoScrollVertical(RecyclerView rv) {
+        if (rv == null || rv.getAdapter() == null || rv.getLayoutManager() == null) return;
+        int currentPos = ((LinearLayoutManager) rv.getLayoutManager()).findFirstVisibleItemPosition();
+        rv.smoothScrollToPosition(currentPos + 1);
     }
 
     private void showLoginBottomSheet() {
@@ -131,21 +239,17 @@ public class MainActivity extends AppCompatActivity {
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_login, null);
         bottomSheetDialog.setContentView(bottomSheetView);
 
-        MaterialButton btnAdmin = bottomSheetView.findViewById(R.id.bsBtnAdmin);
-        MaterialButton btnFaculty = bottomSheetView.findViewById(R.id.bsBtnFaculty);
-        MaterialButton btnStudent = bottomSheetView.findViewById(R.id.bsBtnStudent);
-
-        btnAdmin.setOnClickListener(v -> {
+        bottomSheetView.findViewById(R.id.bsBtnAdmin).setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, AdminLoginActivity.class));
         });
 
-        btnFaculty.setOnClickListener(v -> {
+        bottomSheetView.findViewById(R.id.bsBtnFaculty).setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, FacultyLoginActivity.class));
         });
 
-        btnStudent.setOnClickListener(v -> {
+        bottomSheetView.findViewById(R.id.bsBtnStudent).setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, StudentLoginActivity.class));
         });

@@ -1,0 +1,39 @@
+College Administration
+
+Photo	Name     	Designation	E-mail
+	Prof.K.S.Bose
+M.B.A, Ph.D	Principal	principal@gvpcdpgc.edu.in
+Directors
+Photo	Name     	Designation	E-mail
+	Prof.K.S.Bose
+M.B.A, Ph.D	Director-MBA	ksbose@gvpcdpgc.edu.in
+	Dr I .S. Pallavi	Director - MCA	ipallavi@gvpcdpgc.edu.in
+	Mr. D. Giridhar	Director - UG Courses	giridittakavi@gvpcdpgc.edu.in
+	Dr. P.V. Vinay	Director - E&T	vpragada@gvpcdpgc.edu.in
+	Dr. N.V.Ramana Murty	Director - Research & Development	drnvrmurty@gvpcdpgc.edu.in
+	Mr. P Venkata Krishna	Director - IIPC	venkatakrishna@gvpcdpgc.edu
+Deans
+Photo	Name     	Designation	E-mail
+	Dr. K. V. V. Murali Someswara Rao	Dean - Academics	murali.koyyani@gvpcdpgc.edu.in
+	Dr. P. V. Mohini	Dean - Student Affairs	mohinipuni@gvpcdpgc.edu.in
+	Prof. D. Saritha	Dean Career Guidance, Training & Placement	deanplacements@gvpcdpgc.edu.in
+Controller of Examinations
+Photo	Name     	Designation	E-mail
+	Dr. A. Sairoop	Controller of Examinations	saiallena@gvpcdpgc.edu.in
+Head of the Departments - PG
+Photo	Name     	Designation	E-mail
+	Dr. M.S.R. Seshagiri	HOD - MBA	seshagiri.msr@gvpcdpgc.edu.in
+	Dr. K. V. V. Murali Someswara Rao	HOD - MBA(Business Analytics)	murali.koyyani@gvpcdpgc.edu.in
+	Dr.Karteek Rao Amperayani	HOD - MSc Organic Chemistry	akarteekakrao@gvpcdpgc.edu.in
+Head of the Departments - Engineering & Technology
+Photo	Name     	Designation	E-mail
+	Dr.S.Rajesh	HOD - Basic Sciences and Humanities	srajeshmaths@gvpcdpgc.edu.in
+	Dr. P. Jyotsna Devi	HOD - Civil Engineering	drjyotsnadevi@gvpcdpgc.edu.in
+	Dr.G.R.S Murthy	HOD - Computer Science & Engineering	murthy.grs@gvpcdpgc.edu.in
+	Dr. N.V. Ramana Murthy	HOD - CSE (Artificial Intelligence and Machine Learning)	drnvrmurty@gvpcdpgc.edu.in
+	Dr. P. A. Nageswara Rao	HOD - Electronics & Comunication Engineering	drnageswararao@gvpcdpgc.edu.in
+	Dr. Ch. Himagireesh	HOD - Mechanical Engineering	gireeshhima@gvpcdpgc.edu.in
+Coordinators
+Photo	Name     	Designation	E-mail
+	Dr. Bh. Padma	Coordinator - IQAC	padmabh@gvpcdpgc.edu.in
+	Dr. B. Vidya	Coordinator - Infrastructure	vidya@gvpcdpgc.edu.in

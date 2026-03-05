@@ -10,13 +10,11 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         
-        // Initialize Cloudinary
+        // Initialize Cloudinary for Unsigned Uploads
+        // Only cloud_name is required when using unsigned presets
         Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", "dwz7e2ov0"); // Replace with your cloud name if different
-        config.put("api_key", "731174966675128");    // Replace with your api key if different
-        config.put("api_secret", "YOUR_API_SECRET"); // It's better to use unsigned uploads as you are doing
+        config.put("cloud_name", "dwz7e2ov0"); 
         
-        // For unsigned uploads, you only really need the cloud_name
         MediaManager.init(this, config);
     }
 }

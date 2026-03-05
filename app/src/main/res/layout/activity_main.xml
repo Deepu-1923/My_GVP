@@ -7,7 +7,7 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="320dp"
+        android:layout_height="280dp"
         android:background="@android:color/transparent">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -17,7 +17,7 @@
             app:titleEnabled="false">
 
             <ImageView
-                android:id="@+id/ivCollegePhoto"
+                android:id="@+id/ivHeaderBg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -32,7 +32,30 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/gvplogo" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/btnProfile"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_alignParentEnd="true"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_profile_placeholder"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
+                        android:background="@color/white"
+                        android:elevation="4dp" />
+                </RelativeLayout>
+            </androidx.appcompat.widget.Toolbar>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="GVPCDPGC"
+                    android:text="MyGVP Digital"
                     android:textColor="@color/white"
                     android:textSize="32sp"
                     android:textStyle="bold" />
@@ -70,102 +93,131 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="140dp">
+            android:padding="8dp"
+            android:paddingBottom="120dp">
 
-            <!-- Campus Card -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp"
-                android:text="Our Campus"
+                android:layout_marginBottom="8dp"
+                android:text="Quick Services"
                 android:textColor="@color/textPrimary"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.card.MaterialCardView
+            <GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvCampus"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:overScrollMode="never" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Events Card -->
-            <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="12dp"
-                android:text="Recent Events"
-                android:textColor="@color/textPrimary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:alignmentMode="alignMargins"
+                android:columnCount="2"
+                android:columnOrderPreserved="false"
+                android:padding="8dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
+                <!-- 1. Explore Campus -->
+                <include
+                    android:id="@+id/miniCampus"
+                    layout="@layout/item_mini_content_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvEvents"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:overScrollMode="never" />
-            </com.google.android.material.card.MaterialCardView>
+                <!-- 2. Faculty Directory -->
+                <include
+                    android:id="@+id/miniFaculty"
+                    layout="@layout/item_mini_content_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" />
 
-            <!-- Faculty Card -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="12dp"
-                android:text="Faculty Directory"
-                android:textColor="@color/textPrimary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                <!-- 3. Administration -->
+                <include
+                    android:id="@+id/miniAdmin"
+                    layout="@layout/item_mini_content_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" />
 
+                <!-- 4. Syllabus & Calendar -->
+                <include
+                    android:id="@+id/miniSyllabus"
+                    layout="@layout/item_mini_content_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" />
+
+            </GridLayout>
+
+            <!-- Premium College Info Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 app:cardCornerRadius="28dp"
-                app:cardElevation="4dp"
+                app:cardElevation="8dp"
                 app:strokeWidth="0dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvFaculty"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:overScrollMode="never" />
+                    android:background="@color/primary"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GET IN TOUCH"
+                        android:textColor="@color/accent_light"
+                        android:textSize="12sp"
+                        android:letterSpacing="0.2"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Contact Us"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="40dp"
+                        android:layout_height="3dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="24dp"
+                        android:background="@color/accent" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvContactInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:overScrollMode="never" />
+
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabLogin"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLaunchPortals"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:text="Portal Login"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:text="Launch Portals"
+        android:textAllCaps="false"
         android:textColor="@color/white"
-        app:backgroundTint="@color/primary"
+        android:textSize="16sp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        app:backgroundTint="@color/black"
+        app:cornerRadius="32dp"
         app:icon="@android:drawable/ic_lock_lock"
-        app:iconTint="@color/white" />
+        app:iconTint="@color/white"
+        app:elevation="8dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
