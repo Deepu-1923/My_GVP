@@ -91,15 +91,14 @@ public class StudentDashboardActivity extends AppCompatActivity {
     // --- UPDATED CLOUDINARY LOGIC ---
     private void loadStudentProfile() {
         String cloudName = "dlw4oisub";
+
+        // f_auto handles both JPG and PNG automatically!
         String transformations = "w_300,h_300,c_fill,q_auto,f_auto";
 
-        // REMOVED the "/images/" part to match your exact Cloudinary folders!
-        String cloudinaryUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/" + transformations + "/students/" + branch + "/" + batch + "/" + rollNo + ".jpg";
+        // This looks for the Roll Number as the Public ID in the main Cloudinary area
+        String cloudinaryUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/" + transformations + "/" + rollNo;
 
-        // Optional: Let's pop up a Toast just to prove the URL is correct when you run it
-        Toast.makeText(this, "Trying to load: " + rollNo + ".jpg", Toast.LENGTH_SHORT).show();
-
-        Glide.with(StudentDashboardActivity.this)
+        Glide.with(this)
                 .load(cloudinaryUrl)
                 .apply(RequestOptions.circleCropTransform())
                 .placeholder(R.drawable.ic_profile_placeholder)
