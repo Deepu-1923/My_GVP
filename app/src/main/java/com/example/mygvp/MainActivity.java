@@ -1,15 +1,17 @@
 package com.example.mygvp;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,9 +19,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.mygvp.admin.AdminLoginActivity;
 import com.example.mygvp.faculty.FacultyLoginActivity;
 import com.example.mygvp.student.StudentLoginActivity;
@@ -38,16 +40,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final Handler autoScrollHandler = new Handler(Looper.getMainLooper());
-    private static final int AUTO_SCROLL_DELAY = 3000;
     private DatabaseReference dbRef;
-
-    private RecyclerView rvCampus, rvFaculty, rvAdmin, rvSyllabus, rvContactInfo;
+    private RecyclerView rvContactInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         window.setStatusBarColor(Color.TRANSPARENT);
@@ -61,82 +60,44 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        initViews();
-        setupMiniCards();
-        setupContactInfo();
-        
-        findViewById(R.id.btnProfile).setOnClickListener(v -> showLoginBottomSheet());
-        findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
-        
-        startAutoScroll();
-    }
-
-    private void initViews() {
-        rvCampus = findViewById(R.id.miniCampus).findViewById(R.id.rvMiniContent);
-        rvFaculty = findViewById(R.id.miniFaculty).findViewById(R.id.rvMiniContent);
-        rvAdmin = findViewById(R.id.miniAdmin).findViewById(R.id.rvMiniContent);
-        rvSyllabus = findViewById(R.id.miniSyllabus).findViewById(R.id.rvMiniContent);
         rvContactInfo = findViewById(R.id.rvContactInfo);
+
+        setupDashboard();
+        setupContactInfo();
+
+        findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
     }
 
-    private void setupMiniCards() {
-        // 1. Campus Mini
-        setupMiniHeader(findViewById(R.id.miniCampus), "Explore Campus");
-        List<GalleryItem> campusItems = new ArrayList<>();
-        campusItems.add(new GalleryItem("Campus", "clg_img"));
-        campusItems.add(new GalleryItem("Entrance", "clg_img"));
-        rvCampus.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvCampus.setAdapter(new GalleryAdapter(campusItems));
-        new PagerSnapHelper().attachToRecyclerView(rvCampus);
+    private void setupDashboard() {
+        // 1. Explore Campus
+        View cardCampus = findViewById(R.id.miniCampus);
+        setupCard(cardCampus, "Explore\nCampus", android.R.drawable.ic_menu_gallery, R.color.bg_soft_purple);
+        cardCampus.setOnClickListener(v -> showImagePopup("https://res.cloudinary.com/dlw4oisub/image/upload/v1772769883/girls_hostel.jpg"));
 
-        // 2. Faculty Mini
-        setupMiniHeader(findViewById(R.id.miniFaculty), "Faculty");
-        List<Faculty> facultyList = getFacultyData();
-        rvFaculty.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvFaculty.setAdapter(new HorizontalFacultyAdapter(facultyList));
+        // 2. Faculty Directory
+        View cardFaculty = findViewById(R.id.miniFaculty);
+        setupCard(cardFaculty, "Faculty\nDirectory", android.R.drawable.ic_menu_my_calendar, R.color.bg_soft_blue);
+        cardFaculty.setOnClickListener(v -> startActivity(new Intent(this, CampusGalleryActivity.class))); 
 
-        // 3. Admin Mini
-        setupMiniHeader(findViewById(R.id.miniAdmin), "Administrative");
-        List<Faculty> adminList = getAdminData();
-        rvAdmin.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvAdmin.setAdapter(new HorizontalFacultyAdapter(adminList));
+        // 3. Administrative
+        View cardAdmin = findViewById(R.id.miniAdmin);
+        setupCard(cardAdmin, "Administrative", android.R.drawable.ic_menu_info_details, R.color.bg_soft_orange);
+        cardAdmin.setOnClickListener(v -> Toast.makeText(this, "Admin Services", Toast.LENGTH_SHORT).show());
 
-        // 4. Syllabus Mini
-        setupMiniHeader(findViewById(R.id.miniSyllabus), "Syllabus");
-        List<GalleryItem> syllabusGraphics = new ArrayList<>();
-        syllabusGraphics.add(new GalleryItem("R22", "ic_results"));
-        syllabusGraphics.add(new GalleryItem("Calendar", "ic_attendance"));
-        rvSyllabus.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rvSyllabus.setAdapter(new GalleryAdapter(syllabusGraphics));
-        
-        // Enable click interceptor ONLY for Syllabus card to allow scrolling on others
-        View syllabusClicker = findViewById(R.id.miniSyllabus).findViewById(R.id.vClickInterceptor);
-        if (syllabusClicker != null) {
-            syllabusClicker.setClickable(true);
-            syllabusClicker.setFocusable(true);
-            syllabusClicker.setBackgroundResource(android.R.drawable.list_selector_background);
-            syllabusClicker.setOnClickListener(v -> showSyllabusBottomSheet());
-        }
+        // 4. Syllabus
+        View cardSyllabus = findViewById(R.id.miniSyllabus);
+        setupCard(cardSyllabus, "Syllabus", android.R.drawable.ic_menu_agenda, R.color.bg_soft_green);
+        cardSyllabus.setOnClickListener(v -> showSyllabusBottomSheet());
     }
 
-    private void setupMiniHeader(View card, String title) {
+    private void setupCard(View card, String title, int iconRes, int bgColorRes) {
         TextView tv = card.findViewById(R.id.tvMiniTitle);
-        tv.setText(title);
-    }
+        ImageView iv = card.findViewById(R.id.ivMiniIcon);
+        View iconBg = card.findViewById(R.id.flIconBg);
 
-    private List<Faculty> getFacultyData() {
-        List<Faculty> list = new ArrayList<>();
-        list.add(new Faculty("Dr. G.R.S Murthy", "H.O.D (CSE)", "murthy.grs@gvpcdpgc.edu.in", "dr_grs_murthy"));
-        list.add(new Faculty("Sri R.Kanaka Raju", "Assistant Professor", "rkanakaraju@gvpcdpgc.edu.in", "r_kanaka_raju"));
-        list.add(new Faculty("Mr. M. Anil", "Assistant Professor", "anilmeka@gvpcdpgc.edu.in", "anil"));
-        return list;
-    }
-
-    private List<Faculty> getAdminData() {
-        List<Faculty> list = new ArrayList<>();
-        list.add(new Faculty("Prof. D. Saritha", "Dean", "sarithad@gvpcdpgc.edu.in", "saritha"));
-        list.add(new Faculty("Dr. Bh. Padma", "Professor", "padmabh@gvpcdpgc.edu.in", "padma"));
-        return list;
+        if (tv != null) tv.setText(title);
+        if (iv != null) iv.setImageResource(iconRes);
+        if (iconBg != null) iconBg.setBackgroundTintList(getColorStateList(bgColorRes));
     }
 
     private void setupContactInfo() {
@@ -149,6 +110,28 @@ public class MainActivity extends AppCompatActivity {
         rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
     }
 
+    private void showImagePopup(String imageUrl) {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_image_viewer);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        ImageView ivFullImage = dialog.findViewById(R.id.ivFullImage);
+        View btnClose = dialog.findViewById(R.id.btnClose);
+
+        Glide.with(this)
+                .load(imageUrl)
+                .placeholder(R.drawable.clg_img)
+                .into(ivFullImage);
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
     private void showSyllabusBottomSheet() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_syllabus, null);
@@ -156,91 +139,67 @@ public class MainActivity extends AppCompatActivity {
 
         AutoCompleteTextView spinnerYear = view.findViewById(R.id.spinnerYear);
         AutoCompleteTextView spinnerSem = view.findViewById(R.id.spinnerSem);
-        ChipGroup chipGroupBranch = view.findViewById(R.id.chipGroupBranch);
+        AutoCompleteTextView spinnerBranch = view.findViewById(R.id.spinnerBranch);
         MaterialButton btnDownload = view.findViewById(R.id.btnDownloadSyllabus);
         MaterialButton btnCalendar = view.findViewById(R.id.btnDownloadCalendar);
 
         String[] years = {"1st Year", "2nd Year", "3rd Year", "4th Year"};
         String[] sems = {"Semester 1", "Semester 2"};
+        String[] branches = {"CIVIL", "CSE", "CSM", "ECE", "MECH"};
 
         spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, years));
         spinnerSem.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sems));
+        spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, branches));
 
-        View.OnClickListener updateVisibility = v -> {
-            if (!spinnerYear.getText().toString().isEmpty() && !spinnerSem.getText().toString().isEmpty()) {
-                chipGroupBranch.setVisibility(View.VISIBLE);
-            }
+        Runnable validate = () -> {
+            boolean ready = !spinnerYear.getText().toString().isEmpty() &&
+                    !spinnerSem.getText().toString().isEmpty() &&
+                    !spinnerBranch.getText().toString().isEmpty();
+            btnDownload.setEnabled(ready);
         };
 
-        spinnerYear.setOnItemClickListener((parent, v1, position, id) -> updateVisibility.onClick(null));
-        spinnerSem.setOnItemClickListener((parent, v1, position, id) -> updateVisibility.onClick(null));
-
-        chipGroupBranch.setOnCheckedStateChangeListener((group, checkedIds) -> btnDownload.setEnabled(!checkedIds.isEmpty()));
+        spinnerYear.setOnItemClickListener((parent, v, position, id) -> validate.run());
+        spinnerSem.setOnItemClickListener((parent, v, position, id) -> validate.run());
+        spinnerBranch.setOnItemClickListener((parent, v, position, id) -> validate.run());
 
         btnDownload.setOnClickListener(v -> {
-            int checkedId = chipGroupBranch.getCheckedChipId();
-            if (checkedId != View.NO_ID) {
-                Chip chip = view.findViewById(checkedId);
-                String branch = chip.getText().toString();
-                String year = spinnerYear.getText().toString();
-                String sem = spinnerSem.getText().toString();
-                fetchAndOpenUrl("syllabus/" + year + "/" + sem + "/" + branch);
-                dialog.dismiss();
-            }
+            String branch = spinnerBranch.getText().toString();
+            String year = spinnerYear.getText().toString();
+            String sem = spinnerSem.getText().toString();
+            fetchAndOpen("syllabus/" + year + "/" + sem + "/" + branch);
+            dialog.dismiss();
         });
 
         btnCalendar.setOnClickListener(v -> {
-            fetchAndOpenUrl("academic_calendar/2025-26");
+            fetchAndOpen("academic_calendar/2025-26");
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void fetchAndOpenUrl(String path) {
+    private void fetchAndOpen(String path) {
         dbRef.child(path).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String url = snapshot.getValue(String.class);
                 if (url != null && !url.isEmpty()) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(browserIntent);
+                    try {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(browserIntent);
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Cannot open link: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(MainActivity.this, "File not available yet.", Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
-
-    private void startAutoScroll() {
-        Runnable scrollRunnable = new Runnable() {
-            @Override
-            public void run() {
-                autoScroll(rvCampus);
-                autoScroll(rvFaculty);
-                autoScroll(rvAdmin);
-                autoScroll(rvSyllabus);
-                autoScrollVertical(rvContactInfo);
-                autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
-            }
-        };
-        autoScrollHandler.postDelayed(scrollRunnable, AUTO_SCROLL_DELAY);
-    }
-
-    private void autoScroll(RecyclerView rv) {
-        if (rv == null || rv.getAdapter() == null || rv.getLayoutManager() == null) return;
-        int currentPos = ((LinearLayoutManager) rv.getLayoutManager()).findFirstVisibleItemPosition();
-        int nextPos = (currentPos + 1) % rv.getAdapter().getItemCount();
-        rv.smoothScrollToPosition(nextPos);
-    }
-
-    private void autoScrollVertical(RecyclerView rv) {
-        if (rv == null || rv.getAdapter() == null || rv.getLayoutManager() == null) return;
-        int currentPos = ((LinearLayoutManager) rv.getLayoutManager()).findFirstVisibleItemPosition();
-        rv.smoothScrollToPosition(currentPos + 1);
-    }
-
+    
     private void showLoginBottomSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_login, null);
@@ -262,11 +221,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomSheetDialog.show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        autoScrollHandler.removeCallbacksAndMessages(null);
     }
 }

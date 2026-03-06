@@ -9,6 +9,13 @@
     <color name="accent">#5E17EB</color>
     <color name="accent_light">#F3E5F5</color>
 
+    <!-- Dashboard Icon Backgrounds (Soft Tints) -->
+    <color name="bg_soft_purple">#F3E5F5</color>
+    <color name="bg_soft_blue">#E3F2FD</color>
+    <color name="bg_soft_orange">#FFF3E0</color>
+    <color name="bg_soft_green">#E8F5E9</color>
+    <color name="bg_soft_red">#FFEBEE</color>
+
     <!-- Status Colors -->
     <color name="success">#34C759</color>
     <color name="error">#FF3B30</color>

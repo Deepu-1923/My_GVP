@@ -12,10 +12,10 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:padding="10dp"
-        android:background="#1AFFFFFF"
+        android:background="#1A000000"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
         android:src="@android:drawable/ic_dialog_map"
-        app:tint="@color/white" />
+        app:tint="@color/black" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:text="Address"
-            android:textColor="@color/accent_light"
+            android:textColor="@color/accent"
             android:textSize="12sp"
             android:textAllCaps="true"
             android:letterSpacing="0.1" />
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Gayatri Vidya Parishad College..."
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="15sp"
             android:lineSpacingExtra="2dp" />
     </LinearLayout>

@@ -53,8 +53,14 @@ dependencies {
     implementation("com.sun.mail:android-mail:1.6.6")
     implementation("com.sun.mail:android-activation:1.6.6")
 
+    //git
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
+
+    //google services
+    implementation("com.google.gms:google-services:4.4.2")
+
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
