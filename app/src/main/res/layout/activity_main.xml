@@ -44,16 +44,16 @@
                         android:layout_height="40dp"
                         android:src="@drawable/gvplogo" />
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/btnProfile"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:layout_alignParentEnd="true"
-                        android:padding="4dp"
-                        android:src="@drawable/ic_profile_placeholder"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
-                        android:background="@color/white"
-                        android:elevation="4dp" />
+<!--                    <com.google.android.material.imageview.ShapeableImageView-->
+<!--                        android:id="@+id/btnProfile"-->
+<!--                        android:layout_width="44dp"-->
+<!--                        android:layout_height="44dp"-->
+<!--                        android:layout_alignParentEnd="true"-->
+<!--                        android:padding="4dp"-->
+<!--                        android:src="@drawable/ic_profile_placeholder"-->
+<!--                        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"-->
+<!--                        android:background="@color/white"-->
+<!--                        android:elevation="4dp" />-->
                 </RelativeLayout>
             </androidx.appcompat.widget.Toolbar>
 
@@ -165,7 +165,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_premium_card"
+                    android:background="@drawable/bg_gray_input"
                     android:orientation="vertical"
                     android:padding="24dp">
 
@@ -173,7 +173,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="GET IN TOUCH"
-                        android:textColor="@color/accent_light"
+                        android:textColor="@color/black"
                         android:textSize="11sp"
                         android:letterSpacing="0.3"
                         android:textStyle="bold"
@@ -184,7 +184,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Support &amp; Feedback"
-                        android:textColor="@color/white"
+                        android:textColor="@color/black"
                         android:textSize="22sp"
                         android:fontFamily="sans-serif-medium" />
 
@@ -200,7 +200,7 @@
                         android:id="@+id/rvContactInfo"
                         android:layout_width="match_parent"
                         android:layout_height="220dp"
-                        android:overScrollMode="never" />
+                        android:overScrollMode="never"/>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

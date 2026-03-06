@@ -3,6 +3,7 @@ package com.example.mygvp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -109,9 +110,10 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setEnabled(false);
         btnUpload.setText("Uploading...");
 
-        // Ensure we only use the unsigned preset for the cloud
+        // Reverted to correct preset name: mygvp_preset
         MediaManager.get().upload(selectedFileUri)
-                .unsigned("mygvp_preset") 
+                .unsigned("mygvp_preset")
+                .option("resource_type", "auto") 
                 .callback(new UploadCallback() {
                     @Override public void onSuccess(String requestId, Map resultData) {
                         saveToFirebase((String) resultData.get("secure_url"));
@@ -119,7 +121,15 @@ public class AdminUploadActivity extends AppCompatActivity {
                     @Override public void onError(String requestId, ErrorInfo error) {
                         btnUpload.setEnabled(true);
                         btnUpload.setText("Upload Failed");
-                        Toast.makeText(AdminUploadActivity.this, "Cloudinary Error: " + error.getDescription(), Toast.LENGTH_LONG).show();
+                        
+                        String errorMsg = error.getDescription();
+                        Log.e("CloudinaryError", "Error: " + errorMsg + " Code: " + error.getCode());
+                        
+                        if (errorMsg.contains("401") || errorMsg.contains("API key")) {
+                            Toast.makeText(AdminUploadActivity.this, "Cloudinary Auth Error: Ensure 'mygvp_preset' is set to UNSIGNED in Dashboard and Cloud Name is correct.", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(AdminUploadActivity.this, "Cloudinary Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                        }
                     }
                     @Override public void onStart(String requestId) {}
                     @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
@@ -141,16 +151,13 @@ public class AdminUploadActivity extends AppCompatActivity {
                 return;
             }
 
-            // SMART LOGIC: Handle redundancies to save storage/uploads
             if (branch.equals("CSE") || branch.equals("CSM") || branch.equals("ECE")) {
-                // Single PDF for all 4 years & 8 semesters
                 for (String y : YEARS) {
                     for (String s : SEMS) {
                         dbRef.child("syllabus").child(y).child(s).child(branch).setValue(url);
                     }
                 }
             } else if (branch.equals("CIVIL") || branch.equals("MECH")) {
-                // Single PDF per year (covers both semesters)
                 if (year.isEmpty()) {
                     Toast.makeText(this, "Select Year", Toast.LENGTH_SHORT).show();
                     btnUpload.setEnabled(true);
@@ -160,7 +167,6 @@ public class AdminUploadActivity extends AppCompatActivity {
                     dbRef.child("syllabus").child(year).child(s).child(branch).setValue(url);
                 }
             } else {
-                // Default specific mapping
                 dbRef.child("syllabus").child(year).child(sem).child(branch).setValue(url);
             }
             finishUpload();

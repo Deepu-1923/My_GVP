@@ -13,7 +13,7 @@ public class MyApplication extends Application {
         // Initialize Cloudinary for Unsigned Uploads
         // Only cloud_name is required when using unsigned presets
         Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", "dwz7e2ov0"); 
+        config.put("cloud_name", "dwz7e2ov0");
         
         MediaManager.init(this, config);
     }

@@ -3,44 +3,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="160dp"
-    android:layout_margin="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="24dp"
     app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
     app:strokeWidth="0dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <View
-            android:id="@+id/ivIconBackground"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_icon_circle_purple" />
-
         <ImageView
-            android:id="@+id/ivIcon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="-72dp"
-            android:layout_marginBottom="16dp"
+            android:id="@+id/ivCardIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/bg_circle_icon"
+            android:padding="12dp"
             android:src="@android:drawable/ic_menu_gallery"
-            app:tint="@color/primary" />
+            app:tint="@color/black" />
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvCardTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
             android:text="Explore\nCampus"
-            android:textColor="@color/textPrimary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:lineSpacingExtra="2dp" />
 
-    </LinearLayout>
+    </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>
