@@ -30,20 +30,20 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_overlay_dark" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin">
-
-            </androidx.appcompat.widget.Toolbar>
+<!--            <androidx.appcompat.widget.Toolbar-->
+<!--                android:id="@+id/toolbar"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="?attr/actionBarSize"-->
+<!--                app:layout_collapseMode="pin">-->
+<!--            </androidx.appcompat.widget.Toolbar>-->
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingBottom="12dp"
+                android:paddingHorizontal="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -64,14 +64,14 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="85dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginEnd="20dp">
 
                 <ImageView
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginLeft="13dp"
-                    android:layout_marginTop="30dp"
                     android:src="@drawable/gvplogo"/>
 
                 <!--                    <com.google.android.material.imageview.ShapeableImageView-->
@@ -194,7 +194,7 @@
                         android:fontFamily="sans-serif-medium" />
 
                     <View
-                        android:layout_width="50dp"
+                        android:layout_width="175dp"
                         android:layout_height="4dp"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="20dp"

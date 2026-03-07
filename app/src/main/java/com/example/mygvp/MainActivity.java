@@ -108,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
         setupCard(cardAdmin, "Administrative", android.R.drawable.ic_menu_info_details, R.color.bg_soft_orange);
         cardAdmin.setOnClickListener(v -> Toast.makeText(this, "Admin Services", Toast.LENGTH_SHORT).show());
 
-        // 4. Syllabus
+        // 4. Syllabus & Calendar
         View cardSyllabus = findViewById(R.id.miniSyllabus);
-        setupCard(cardSyllabus, "Syllabus", android.R.drawable.ic_menu_agenda, R.color.bg_soft_green);
+        setupCard(cardSyllabus, "Academic\nResources", android.R.drawable.ic_menu_agenda, R.color.bg_soft_green);
         cardSyllabus.setOnClickListener(v -> showSyllabusBottomSheet());
     }
 
