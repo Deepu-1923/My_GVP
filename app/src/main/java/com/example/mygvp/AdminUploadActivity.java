@@ -25,6 +25,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class AdminUploadActivity extends AppCompatActivity {
@@ -42,8 +45,13 @@ public class AdminUploadActivity extends AppCompatActivity {
     private static final int PICK_FILE = 100;
     private DatabaseReference dbRef;
 
-    private final String[] YEARS = {"1st Year", "2nd Year", "3rd Year", "4th Year"};
-    private final String[] SEMS = {"Semester 1", "Semester 2"};
+    // Added "All" options for smarter consolidated uploads
+    private final String[] YEARS_OPTIONS = {"All Years", "1st Year", "2nd Year", "3rd Year", "4th Year"};
+    private final String[] SEMS_OPTIONS = {"All Semesters", "Semester 1", "Semester 2"};
+    
+    // Base values for iteration
+    private final String[] ACTUAL_YEARS = {"1st Year", "2nd Year", "3rd Year", "4th Year"};
+    private final String[] ACTUAL_SEMS = {"Semester 1", "Semester 2"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +95,8 @@ public class AdminUploadActivity extends AppCompatActivity {
     private void setupSpinners() {
         String[] branches = {"CIVIL", "CSE", "CSM", "ECE", "MECH"};
 
-        spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, YEARS));
-        spinnerSem.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, SEMS));
+        spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, YEARS_OPTIONS));
+        spinnerSem.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, SEMS_OPTIONS));
         spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, branches));
     }
 
@@ -110,9 +118,9 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setEnabled(false);
         btnUpload.setText("Uploading...");
 
-        // Reverted to correct preset name: mygvp_preset
+        // Using your new preset: sylbs_caldr
         MediaManager.get().upload(selectedFileUri)
-                .unsigned("mygvp_preset")
+                .unsigned("sylbs_caldr")
                 .option("resource_type", "auto") 
                 .callback(new UploadCallback() {
                     @Override public void onSuccess(String requestId, Map resultData) {
@@ -121,15 +129,8 @@ public class AdminUploadActivity extends AppCompatActivity {
                     @Override public void onError(String requestId, ErrorInfo error) {
                         btnUpload.setEnabled(true);
                         btnUpload.setText("Upload Failed");
-                        
-                        String errorMsg = error.getDescription();
-                        Log.e("CloudinaryError", "Error: " + errorMsg + " Code: " + error.getCode());
-                        
-                        if (errorMsg.contains("401") || errorMsg.contains("API key")) {
-                            Toast.makeText(AdminUploadActivity.this, "Cloudinary Auth Error: Ensure 'mygvp_preset' is set to UNSIGNED in Dashboard and Cloud Name is correct.", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(AdminUploadActivity.this, "Cloudinary Error: " + errorMsg, Toast.LENGTH_LONG).show();
-                        }
+                        Log.e("CloudinaryError", "Error: " + error.getDescription());
+                        Toast.makeText(AdminUploadActivity.this, "Upload Error: " + error.getDescription(), Toast.LENGTH_LONG).show();
                     }
                     @Override public void onStart(String requestId) {}
                     @Override public void onProgress(String requestId, long bytes, long totalBytes) {}
@@ -141,8 +142,8 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setText("Syncing Database...");
         
         if (rgType.getCheckedRadioButtonId() == R.id.rbSyllabus) {
-            String year = spinnerYear.getText().toString();
-            String sem = spinnerSem.getText().toString();
+            String selectedYear = spinnerYear.getText().toString();
+            String selectedSem = spinnerSem.getText().toString();
             String branch = spinnerBranch.getText().toString();
             
             if(branch.isEmpty()) {
@@ -151,23 +152,28 @@ public class AdminUploadActivity extends AppCompatActivity {
                 return;
             }
 
-            if (branch.equals("CSE") || branch.equals("CSM") || branch.equals("ECE")) {
-                for (String y : YEARS) {
-                    for (String s : SEMS) {
-                        dbRef.child("syllabus").child(y).child(s).child(branch).setValue(url);
-                    }
-                }
-            } else if (branch.equals("CIVIL") || branch.equals("MECH")) {
-                if (year.isEmpty()) {
-                    Toast.makeText(this, "Select Year", Toast.LENGTH_SHORT).show();
-                    btnUpload.setEnabled(true);
-                    return;
-                }
-                for (String s : SEMS) {
-                    dbRef.child("syllabus").child(year).child(s).child(branch).setValue(url);
-                }
+            // SMART LOGIC: Handle "All" selections
+            List<String> yearsToUpload = new ArrayList<>();
+            if (selectedYear.equals("All Years")) {
+                yearsToUpload.addAll(Arrays.asList(ACTUAL_YEARS));
             } else {
-                dbRef.child("syllabus").child(year).child(sem).child(branch).setValue(url);
+                yearsToUpload.add(selectedYear);
+            }
+
+            List<String> semsToUpload = new ArrayList<>();
+            if (selectedSem.equals("All Semesters")) {
+                semsToUpload.addAll(Arrays.asList(ACTUAL_SEMS));
+            } else {
+                semsToUpload.add(selectedSem);
+            }
+
+            // Sync all selected nodes to the SAME URL (Cloudinary URL is reused)
+            for (String y : yearsToUpload) {
+                if (y.isEmpty()) continue;
+                for (String s : semsToUpload) {
+                    if (s.isEmpty()) continue;
+                    dbRef.child("syllabus").child(y).child(s).child(branch).setValue(url);
+                }
             }
             finishUpload();
             
@@ -184,7 +190,7 @@ public class AdminUploadActivity extends AppCompatActivity {
     }
 
     private void finishUpload() {
-        Toast.makeText(this, "Success! Syllabus Linked.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Success! File Linked.", Toast.LENGTH_LONG).show();
         btnUpload.setEnabled(true);
         btnUpload.setText("Upload Another");
         selectedFileUri = null;
