@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,15 +22,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
 import com.example.mygvp.admin.AdminLoginActivity;
 import com.example.mygvp.faculty.FacultyLoginActivity;
 import com.example.mygvp.student.StudentLoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,12 +36,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference dbRef;
     private RecyclerView rvContactInfo;
+    private Handler sliderHandler = new Handler(Looper.getMainLooper());
+    private Runnable sliderRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +74,36 @@ public class MainActivity extends AppCompatActivity {
     private void setupDashboard() {
         // 1. Explore Campus
         View cardCampus = findViewById(R.id.miniCampus);
+        // Changed to pass 0 so the icon hides completely
         setupCard(cardCampus, "Explore\nCampus", android.R.drawable.ic_menu_gallery, R.color.bg_soft_purple);
-        cardCampus.setOnClickListener(v -> showImagePopup("https://res.cloudinary.com/dlw4oisub/image/upload/v1772769883/girls_hostel.jpg"));
+
+        // Changed from String URLs to Integer R.drawable resources
+        List<Integer> campusImages = Arrays.asList(
+                R.drawable.main_gate,
+                R.drawable.canteen,
+                R.drawable.degree_block,
+                R.drawable.parking,
+                R.drawable.girls_hostel,
+                R.drawable.gym_sports_room,
+                R.drawable.basket_ball_ground
+        );
+
+        List<String> campusTitles = Arrays.asList(
+                "Main Gate",
+                "College Canteen",
+                "Degree Block",
+                "Parking Area",
+                "Girls Hostel",
+                "Gym and Sports",
+                "Basketball Ground"
+        );
+
+        cardCampus.setOnClickListener(v -> showImageSliderPopup(campusImages, campusTitles));
 
         // 2. Faculty Directory
         View cardFaculty = findViewById(R.id.miniFaculty);
         setupCard(cardFaculty, "Faculty\nDirectory", android.R.drawable.ic_menu_my_calendar, R.color.bg_soft_blue);
-        cardFaculty.setOnClickListener(v -> startActivity(new Intent(this, CampusGalleryActivity.class))); 
+        cardFaculty.setOnClickListener(v -> startActivity(new Intent(this, CampusGalleryActivity.class)));
 
         // 3. Administrative
         View cardAdmin = findViewById(R.id.miniAdmin);
@@ -96,7 +122,17 @@ public class MainActivity extends AppCompatActivity {
         View iconBg = card.findViewById(R.id.flIconBg);
 
         if (tv != null) tv.setText(title);
-        if (iv != null) iv.setImageResource(iconRes);
+
+        if (iv != null) {
+            // New logic to hide the image if iconRes is 0
+            if (iconRes == 0) {
+                iv.setVisibility(View.GONE);
+            } else {
+                iv.setVisibility(View.VISIBLE);
+                iv.setImageResource(iconRes);
+            }
+        }
+
         if (iconBg != null) iconBg.setBackgroundTintList(getColorStateList(bgColorRes));
     }
 
@@ -105,12 +141,13 @@ public class MainActivity extends AppCompatActivity {
         infoList.add(new ContactInfo("📍 Address", "Gayatri Vidya Parishad College, Rushikonda, Visakhapatnam-530045.", android.R.drawable.ic_dialog_map));
         infoList.add(new ContactInfo("📧 Email", "principalgvpcdpgca@gmail.com", android.R.drawable.ic_dialog_email));
         infoList.add(new ContactInfo("📞 Contact", "0891-2783722 / 2955084", android.R.drawable.ic_menu_call));
-        
+
         rvContactInfo.setLayoutManager(new LinearLayoutManager(this));
         rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
     }
 
-    private void showImagePopup(String imageUrl) {
+    // Changed List<String> to List<Integer> to accept the drawables
+    private void showImageSliderPopup(List<Integer> images, List<String> titles) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_image_viewer);
@@ -120,15 +157,39 @@ public class MainActivity extends AppCompatActivity {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         }
 
-        ImageView ivFullImage = dialog.findViewById(R.id.ivFullImage);
+        ViewPager2 viewPager = dialog.findViewById(R.id.vpImageSlider);
         View btnClose = dialog.findViewById(R.id.btnClose);
 
-        Glide.with(this)
-                .load(imageUrl)
-                .placeholder(R.drawable.clg_img)
-                .into(ivFullImage);
+        GallerySliderAdapter adapter = new GallerySliderAdapter(this, images, titles);
+        viewPager.setAdapter(adapter);
 
-        btnClose.setOnClickListener(v -> dialog.dismiss());
+        sliderRunnable = new Runnable() {
+            @Override
+            public void run() {
+                int nextItem = (viewPager.getCurrentItem() + 1) % images.size();
+                viewPager.setCurrentItem(nextItem, true);
+                sliderHandler.postDelayed(this, 3000);
+            }
+        };
+        sliderHandler.postDelayed(sliderRunnable, 3000);
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                    sliderHandler.removeCallbacks(sliderRunnable);
+                }
+            }
+        });
+
+        btnClose.setOnClickListener(v -> {
+            sliderHandler.removeCallbacks(sliderRunnable);
+            dialog.dismiss();
+        });
+
+        dialog.setOnDismissListener(d -> sliderHandler.removeCallbacks(sliderRunnable));
+
         dialog.show();
     }
 
@@ -199,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     private void showLoginBottomSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_login, null);

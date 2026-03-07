@@ -7,24 +7,21 @@
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="550dp"
         android:layout_centerInParent="true"
         android:layout_margin="24dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="@android:color/transparent">
+        app:cardCornerRadius="28dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/white">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/ivFullImage"
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpImageSlider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:src="@drawable/clg_img" />
+                android:layout_height="match_parent" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/btnClose"
@@ -38,7 +35,8 @@
                 app:maxImageSize="24dp"
                 app:backgroundTint="@color/white"
                 app:tint="@color/black"
-                app:elevation="4dp" />
+                app:elevation="4dp"
+                android:contentDescription="Close Popup" />
 
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
