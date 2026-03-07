@@ -1,33 +1,25 @@
 package com.example.mygvp;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import java.util.List;
 
 public class GallerySliderAdapter extends RecyclerView.Adapter<GallerySliderAdapter.ViewHolder> {
-    private List<String> images;
+    private List<Integer> images; // Changed from String to Integer for drawable IDs
+    private List<String> titles;
     private Context context;
 
-    // BASED ON YOUR SCREENSHOT: The folder path is MyGVP/campus_gallery/
-    // Replace 'your_cloud_name' with your actual Cloudinary name!
-    private String baseUrl = "https://res.cloudinary.com/dlw4oisub/image/upload/f_auto,q_auto/MyGVP/campus_gallery/";
-
-    public GallerySliderAdapter(Context context, List<String> images) {
+    public GallerySliderAdapter(Context context, List<Integer> images, List<String> titles) {
         this.context = context;
         this.images = images;
+        this.titles = titles;
     }
 
     @NonNull
@@ -38,27 +30,18 @@ public class GallerySliderAdapter extends RecyclerView.Adapter<GallerySliderAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Cloudinary doesn't strictly need .jpg if you use f_auto, but it helps reliability
-        String finalUrl = baseUrl + images.get(position) + ".jpg";
-
-        holder.pbLoader.setVisibility(View.VISIBLE);
-
+        // Loads the local drawable instantly
         Glide.with(context)
-                .load(finalUrl)
-                .placeholder(R.drawable.clg_img) // Shows your college pic while loading
-                .error(R.drawable.clg_img)      // Fix: Uses clg_img if URL fails
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        holder.pbLoader.setVisibility(View.GONE);
-                        return false;
-                    }
-                    @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        holder.pbLoader.setVisibility(View.GONE);
-                        return false;
-                    }
-                }).into(holder.ivFullImage);
+                .load(images.get(position))
+                .into(holder.ivFullImage);
+
+        // Set the title
+        if (titles != null && position < titles.size()) {
+            holder.tvImageTitle.setText(titles.get(position));
+            holder.tvImageTitle.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvImageTitle.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -66,11 +49,12 @@ public class GallerySliderAdapter extends RecyclerView.Adapter<GallerySliderAdap
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivFullImage;
-        ProgressBar pbLoader;
+        TextView tvImageTitle;
+
         public ViewHolder(@NonNull View v) {
             super(v);
             ivFullImage = v.findViewById(R.id.ivFullImage);
-            pbLoader = v.findViewById(R.id.pbLoader);
+            tvImageTitle = v.findViewById(R.id.tvImageTitle);
         }
     }
 }
