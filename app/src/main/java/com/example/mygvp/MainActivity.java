@@ -74,10 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private void setupDashboard() {
         // 1. Explore Campus
         View cardCampus = findViewById(R.id.miniCampus);
-        // Changed to pass 0 so the icon hides completely
         setupCard(cardCampus, "Explore\nCampus", android.R.drawable.ic_menu_gallery, R.color.bg_soft_purple);
 
-        // Changed from String URLs to Integer R.drawable resources
         List<Integer> campusImages = Arrays.asList(
                 R.drawable.main_gate,
                 R.drawable.canteen,
@@ -124,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
         if (tv != null) tv.setText(title);
 
         if (iv != null) {
-            // New logic to hide the image if iconRes is 0
             if (iconRes == 0) {
                 iv.setVisibility(View.GONE);
             } else {
@@ -146,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
         rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
     }
 
-    // Changed List<String> to List<Integer> to accept the drawables
     private void showImageSliderPopup(List<Integer> images, List<String> titles) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -227,38 +223,61 @@ public class MainActivity extends AppCompatActivity {
             String branch = spinnerBranch.getText().toString();
             String year = spinnerYear.getText().toString();
             String sem = spinnerSem.getText().toString();
-            fetchAndOpen("syllabus/" + year + "/" + sem + "/" + branch);
+            fetchAndOpen("syllabus/" + year + "/" + sem + "/" + branch, "Syllabus");
             dialog.dismiss();
         });
 
         btnCalendar.setOnClickListener(v -> {
-            fetchAndOpen("academic_calendar/2025-26");
+            fetchLatestCalendar();
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void fetchAndOpen(String path) {
+    private void fetchLatestCalendar() {
+        // Fetch the most recent academic calendar year entry
+        dbRef.child("academic_calendar").orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String url = ds.getValue(String.class);
+                        openUrl(url, "Academic Calendar (" + ds.getKey() + ")");
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Calendar not uploaded yet.", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void fetchAndOpen(String path, String type) {
         dbRef.child(path).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String url = snapshot.getValue(String.class);
                 if (url != null && !url.isEmpty()) {
-                    try {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(browserIntent);
-                    } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "Cannot open link: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                    openUrl(url, type);
                 } else {
-                    Toast.makeText(MainActivity.this, "File not available yet.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, type + " not available for this selection.", Toast.LENGTH_SHORT).show();
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void openUrl(String url, String title) {
+        try {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browserIntent);
+            Toast.makeText(this, "Opening " + title, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Could not open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showLoginBottomSheet() {
