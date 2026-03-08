@@ -58,7 +58,7 @@
                 android:textColor="@color/error"
                 app:cornerRadius="16dp"
                 app:strokeColor="@color/error"
-                app:strokeWidth="2dp" />
+                app:strokeWidth="1.5dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/rbFound"
@@ -72,7 +72,7 @@
                 android:textColor="@color/warning"
                 app:cornerRadius="16dp"
                 app:strokeColor="@color/warning"
-                app:strokeWidth="2dp" />
+                app:strokeWidth="1.5dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -118,7 +118,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="@drawable/bg_status_tag"
+            android:background="@drawable/bg_tag_lost"
             android:padding="12dp">
 
             <com.google.android.material.card.MaterialCardView
@@ -142,7 +142,7 @@
                     android:layout_height="match_parent"
                     android:padding="16dp"
                     android:scaleType="centerInside"
-                    android:src="@android:drawable/ic_menu_camera"
+                    android:src="@drawable/ic_camera_modern"
                     app:tint="@color/accent" />
             </com.google.android.material.card.MaterialCardView>
 

@@ -55,7 +55,8 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="All Items"
-                    app:chipBackgroundColor="@color/accent_light"
+                    android:textColor="@color/chip_text_all"
+                    app:chipBackgroundColor="@color/chip_bg_all"
                     app:chipStrokeColor="@color/accent"
                     app:chipStrokeWidth="1dp" />
 
@@ -65,10 +66,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lost"
+                    android:textColor="@color/chip_text_lost"
+                    app:chipBackgroundColor="@color/chip_bg_lost"
                     app:chipStrokeColor="@color/error"
-                    app:chipStrokeWidth="1.5dp"
-                    app:chipBackgroundColor="@color/white"
-                    android:textColor="@color/error" />
+                    app:chipStrokeWidth="1.5dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipFound"
@@ -76,10 +77,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Found"
+                    android:textColor="@color/chip_text_found"
+                    app:chipBackgroundColor="@color/chip_bg_found"
                     app:chipStrokeColor="@color/warning"
-                    app:chipStrokeWidth="1.5dp"
-                    app:chipBackgroundColor="@color/white"
-                    android:textColor="@color/warning" />
+                    app:chipStrokeWidth="1.5dp" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
@@ -105,7 +106,7 @@
         android:textColor="@color/white"
         app:backgroundTint="@color/primary"
         app:cornerRadius="24dp"
-        app:icon="@android:drawable/ic_input_add"
+        app:icon="@drawable/ic_camera_modern"
         app:iconTint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -59,7 +59,7 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
                 item.getTimestamp(), System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS);
         holder.tvTimestamp.setText(timeAgo);
 
-        Glide.with(context).load(item.getImageUrl()).placeholder(android.R.drawable.ic_menu_camera).into(holder.ivItemPhoto);
+        Glide.with(context).load(item.getImageUrl()).placeholder(R.drawable.ic_camera_modern).into(holder.ivItemPhoto);
 
         holder.ivItemPhoto.setOnClickListener(v -> showImageModal(context, item.getImageUrl()));
 
@@ -68,13 +68,16 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
 
         if (item.getStatus().equals("RESOLVED") || item.getStatus().equals("CLAIMED")) {
             holder.tvItemStatus.setTextColor(context.getColor(R.color.success));
+            holder.tvItemStatus.setBackgroundResource(R.drawable.bg_tag_found); // Reusing soft orange or similar if needed, but let's stick to defined ones
             holder.btnAction.setVisibility(View.GONE);
             holder.btnEdit.setVisibility(View.GONE);
         } else {
             if(item.getStatus().equals("LOST")) {
                 holder.tvItemStatus.setTextColor(context.getColor(R.color.error));
+                holder.tvItemStatus.setBackgroundResource(R.drawable.bg_tag_lost);
             } else {
                 holder.tvItemStatus.setTextColor(context.getColor(R.color.warning));
+                holder.tvItemStatus.setBackgroundResource(R.drawable.bg_tag_found);
             }
             holder.btnAction.setVisibility(View.VISIBLE);
 
