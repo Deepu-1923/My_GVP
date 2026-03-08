@@ -3,6 +3,7 @@ package com.example.mygvp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -105,13 +106,47 @@ public class AdminUploadActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_FILE && resultCode == RESULT_OK && data != null) {
             selectedFileUri = data.getData();
-            tvStatus.setText("PDF Selected: " + selectedFileUri.getLastPathSegment());
+            long size = getFileSize(selectedFileUri);
+            String sizeText = formatFileSize(size);
+            tvStatus.setText("PDF Selected: " + selectedFileUri.getLastPathSegment() + " (" + sizeText + ")");
+            
+            if (size > 10 * 1024 * 1024) { // 10MB limit check
+                tvStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                Toast.makeText(this, "File too large! File-size Limit is 10MB.", Toast.LENGTH_LONG).show();
+            } else {
+                tvStatus.setTextColor(getResources().getColor(android.R.color.black));
+            }
         }
+    }
+
+    private long getFileSize(Uri uri) {
+        try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (sizeIndex != -1) return cursor.getLong(sizeIndex);
+            }
+        } catch (Exception e) {
+            Log.e("AdminUpload", "Error getting file size", e);
+        }
+        return 0;
+    }
+
+    private String formatFileSize(long size) {
+        if (size <= 0) return "0 B";
+        final String[] units = new String[]{"B", "KB", "MB", "GB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new java.text.DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     private void upload() {
         if (selectedFileUri == null) {
             Toast.makeText(this, "Select a file first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        long size = getFileSize(selectedFileUri);
+        if (size > 10 * 1024 * 1024) {
+            Toast.makeText(this, "Cannot upload: File exceeds 10MB limit. Please compress the PDF first.", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -195,5 +230,6 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setText("Upload Another");
         selectedFileUri = null;
         tvStatus.setText("No file selected");
+        tvStatus.setTextColor(getResources().getColor(android.R.color.black));
     }
 }

@@ -12,7 +12,7 @@
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         android:background="#E0E0E0" />
 
     <RelativeLayout
@@ -47,20 +47,29 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
+        <!-- Refined Calendar Action: Chip/Pill Style -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDownloadCalendar"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="Calendar"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:text="@string/calendar"
             android:textAllCaps="false"
             android:textColor="@color/accent"
-            android:textSize="18sp"
+            android:textSize="16sp"
+            app:backgroundTint="@color/accent_light"
+            app:cornerRadius="20dp"
             app:icon="@android:drawable/ic_menu_my_calendar"
-            app:iconSize="18dp"
+            app:iconPadding="6dp"
+            app:iconSize="16dp"
             app:iconTint="@color/accent" />
     </RelativeLayout>
 
@@ -85,11 +94,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:hint="Branch"
+                android:hint="@string/branch"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusTopStart="12dp">
+                app:boxCornerRadiusTopStart="12dp"
+                app:startIconTint="@color/textTertiary">
 
                 <AutoCompleteTextView
                     android:id="@+id/spinnerBranch"
@@ -111,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:hint="Year"
+                    android:hint="@string/year"
                     app:boxCornerRadiusBottomEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
@@ -132,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    android:hint="Semester"
+                    android:hint="@string/semester"
                     app:boxCornerRadiusBottomEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
@@ -157,10 +167,13 @@
         android:layout_height="56dp"
         android:enabled="false"
         android:fontFamily="sans-serif-medium"
-        android:text="View/Download Syllabus"
+        android:text="@string/view_download_syllabus"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="16dp"
-        app:elevation="2dp" />
+        app:elevation="2dp"
+        app:icon="@android:drawable/ic_menu_view"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp" />
 
 </LinearLayout>
