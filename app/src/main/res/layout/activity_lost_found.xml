@@ -13,34 +13,29 @@
         android:background="@color/white"
         app:elevation="0dp">
 
-        <RelativeLayout
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
-
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_revert"
-                app:tint="@color/textPrimary" />
+            android:layout_height="?attr/actionBarSize"
+            app:contentInsetStartWithNavigation="0dp"
+            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:navigationIconTint="@color/textPrimary">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:fontFamily="sans-serif-medium"
+                android:layout_gravity="center"
+                android:fontFamily="sans-serif-black"
                 android:text="Lost &amp; Found"
                 android:textColor="@color/textPrimary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
+                android:textSize="20sp" />
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:overScrollMode="never"
             android:scrollbars="none">
 
             <com.google.android.material.chip.ChipGroup
@@ -49,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingBottom="12dp"
+                android:paddingBottom="16dp"
                 app:selectionRequired="true"
                 app:singleSelection="true">
 
@@ -61,7 +56,8 @@
                     android:checked="true"
                     android:text="All Items"
                     app:chipBackgroundColor="@color/accent_light"
-                    app:chipStrokeWidth="0dp" />
+                    app:chipStrokeColor="@color/accent"
+                    app:chipStrokeWidth="1dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipLost"
@@ -70,7 +66,9 @@
                     android:layout_height="wrap_content"
                     android:text="Lost"
                     app:chipStrokeColor="@color/error"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipStrokeWidth="1.5dp"
+                    app:chipBackgroundColor="@color/white"
+                    android:textColor="@color/error" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipFound"
@@ -78,8 +76,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Found"
-                    app:chipStrokeColor="@color/success"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipStrokeColor="@color/warning"
+                    app:chipStrokeWidth="1.5dp"
+                    app:chipBackgroundColor="@color/white"
+                    android:textColor="@color/warning" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
@@ -90,19 +90,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="88dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:text="Report Item"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:text="Report an Item"
         android:textAllCaps="false"
         android:textColor="@color/white"
         app:backgroundTint="@color/primary"
+        app:cornerRadius="24dp"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="@color/white" />
 

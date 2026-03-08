@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="32dp"
-    app:cardElevation="0dp">
+    app:cardCornerRadius="28dp"
+    app:cardElevation="8dp"
+    app:cardPreventCornerOverlap="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,35 +14,34 @@
         android:padding="24dp">
 
         <View
-            android:layout_width="48dp"
-            android:layout_height="5dp"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
-            android:background="#E0E0E0" />
+            android:background="#D1D1D1" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
             android:text="Report an Item"
             android:textColor="@color/textPrimary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="26sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Help the community by sharing details."
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Help fellow students by providing details."
             android:textColor="@color/textSecondary"
-            android:textSize="14sp"
-            android:layout_marginBottom="24dp"/>
+            android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/rgStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginTop="24dp"
             app:checkedButton="@+id/rbLost"
             app:selectionRequired="true"
             app:singleSelection="true">
@@ -50,29 +50,37 @@
                 android:id="@+id/rbLost"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:text="Lost Item"
+                android:fontFamily="sans-serif-medium"
+                android:text="Lost"
                 android:textAllCaps="false"
-                app:cornerRadius="16dp" />
+                android:textColor="@color/error"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/error"
+                app:strokeWidth="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/rbFound"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:text="Found Item"
+                android:fontFamily="sans-serif-medium"
+                android:text="Found"
                 android:textAllCaps="false"
-                app:cornerRadius="16dp" />
+                android:textColor="@color/warning"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/warning"
+                app:strokeWidth="2dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="Item Name (e.g. Black Wallet)"
+            android:layout_marginTop="20dp"
+            android:hint="Item Name"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -82,6 +90,7 @@
                 android:id="@+id/etItemTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:inputType="textCapWords" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,8 +98,8 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:hint="Additional Details"
+            android:layout_marginTop="16dp"
+            android:hint="Description (Place, Time, etc.)"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -99,22 +108,31 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etItemMessage"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="100dp"
+                android:fontFamily="sans-serif"
                 android:gravity="top"
                 android:inputType="textMultiLine" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp">
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_status_tag"
+            android:padding="12dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardImagePreview"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:strokeColor="@color/divider"
                 app:strokeWidth="1dp">
 
@@ -122,34 +140,66 @@
                     android:id="@+id/ivSelectedImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
+                    android:padding="16dp"
+                    android:scaleType="centerInside"
                     android:src="@android:drawable/ic_menu_camera"
-                    app:tint="@color/textTertiary" />
+                    app:tint="@color/accent" />
             </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvImageHint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Add an Item Photo"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@id/btnSelectImage"
+                app:layout_constraintStart_toEndOf="@id/cardImagePreview"
+                app:layout_constraintTop_toTopOf="@id/cardImagePreview" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="Tap icon for camera or choose from the gallery"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp"
+                app:layout_constraintEnd_toStartOf="@id/btnSelectImage"
+                app:layout_constraintStart_toStartOf="@id/tvImageHint"
+                app:layout_constraintTop_toBottomOf="@id/tvImageHint" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSelectImage"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:layout_toEndOf="@id/cardImagePreview"
-                android:text="Choose Photo"
+                android:text="Choose"
+                android:textSize="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/accent"
-                app:icon="@android:drawable/ic_menu_gallery" />
-        </RelativeLayout>
+                app:cornerRadius="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:strokeColor="@color/accent"
+                app:strokeWidth="1dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSubmitItem"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
             android:text="Post Announcement"
             android:textAllCaps="false"
             android:textSize="18sp"
             app:backgroundTint="@color/primary"
-            app:cornerRadius="20dp" />
+            app:cornerRadius="18dp" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

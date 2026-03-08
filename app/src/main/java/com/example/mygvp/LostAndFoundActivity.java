@@ -1,18 +1,17 @@
 package com.example.mygvp;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -21,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.database.DataSnapshot;
@@ -57,7 +58,27 @@ public class LostAndFoundActivity extends AppCompatActivity {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     selectedImageUri = result.getData().getData();
                     if (dialogImageViewPreview != null) {
-                        Glide.with(this).load(selectedImageUri).centerCrop().into(dialogImageViewPreview);
+                        dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                        dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        Glide.with(this).load(selectedImageUri).into(dialogImageViewPreview);
+                    }
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Bundle extras = result.getData().getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    if (imageBitmap != null) {
+                        selectedImageUri = getImageUri(imageBitmap);
+                        if (dialogImageViewPreview != null) {
+                            dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                            dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            Glide.with(this).load(selectedImageUri).into(dialogImageViewPreview);
+                        }
                     }
                 }
             }
@@ -65,11 +86,10 @@ public class LostAndFoundActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Safe check for API Key
         try {
             IMGBB_API_KEY = getString(R.string.imgbb_api_key);
         } catch (Exception e) {
-            IMGBB_API_KEY = "68c5b96439066601247065975d048450"; // Fallback if resource missing
+            IMGBB_API_KEY = "68c5b96439066601247065975d048450"; 
         }
         
         super.onCreate(savedInstanceState);
@@ -86,9 +106,15 @@ public class LostAndFoundActivity extends AppCompatActivity {
         masterList = new ArrayList<>();
         displayList = new ArrayList<>();
 
-        adapter = new LostItemAdapter(displayList, item -> showEditItemDialog(item));
+        adapter = new LostItemAdapter(displayList, item -> showItemBottomSheet(item));
         recyclerView.setAdapter(adapter);
 
+        // Navigation
+        View navBack = findViewById(R.id.toolbar);
+        if (navBack != null) {
+            navBack.setOnClickListener(v -> finish());
+        }
+        
         ChipGroup chipGroup = findViewById(R.id.chipGroupFilter);
         if (chipGroup != null) {
             chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
@@ -101,7 +127,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
             });
         }
 
-        findViewById(R.id.fabAddItem).setOnClickListener(v -> showAddItemDialog());
+        findViewById(R.id.fabAddItem).setOnClickListener(v -> showItemBottomSheet(null));
 
         loadFeedFromFirebase();
     }
@@ -126,7 +152,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
                             masterList.add(item);
                         }
                     } catch (Exception e) {
-                        // Skip malformed entries without crashing
+                        // Skip corrupted data
                     }
                 }
                 updateCurrentFilter();
@@ -166,34 +192,52 @@ public class LostAndFoundActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void showAddItemDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_add_item);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
+    private void showItemBottomSheet(LostItem existingItem) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_item, null);
+        bottomSheetDialog.setContentView(view);
 
         selectedImageUri = null;
-        dialogImageViewPreview = dialog.findViewById(R.id.ivSelectedImage);
-        Button btnSelectImage = dialog.findViewById(R.id.btnSelectImage);
-        Button btnSubmitItem = dialog.findViewById(R.id.btnSubmitItem);
-        EditText etItemTitle = dialog.findViewById(R.id.etItemTitle);
-        EditText etItemMessage = dialog.findViewById(R.id.etItemMessage);
-        MaterialButtonToggleGroup rgStatus = dialog.findViewById(R.id.rgStatus);
+        dialogImageViewPreview = view.findViewById(R.id.ivSelectedImage);
+        View cardImagePreview = view.findViewById(R.id.cardImagePreview);
+        MaterialButton btnSelectImage = view.findViewById(R.id.btnSelectImage);
+        MaterialButton btnSubmitItem = view.findViewById(R.id.btnSubmitItem);
+        EditText etItemTitle = view.findViewById(R.id.etItemTitle);
+        EditText etItemMessage = view.findViewById(R.id.etItemMessage);
+        MaterialButtonToggleGroup rgStatus = view.findViewById(R.id.rgStatus);
 
-        btnSelectImage.setOnClickListener(view -> {
+        if (existingItem != null) {
+            btnSubmitItem.setText("Update Post");
+            etItemTitle.setText(existingItem.getTitle());
+            etItemMessage.setText(existingItem.getMessage());
+            if ("FOUND".equals(existingItem.getStatus())) rgStatus.check(R.id.rbFound);
+            else rgStatus.check(R.id.rbLost);
+            Glide.with(this).load(existingItem.getImageUrl()).into(dialogImageViewPreview);
+            if (dialogImageViewPreview != null) {
+                dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
+        }
+
+        if (cardImagePreview != null) {
+            cardImagePreview.setOnClickListener(v -> {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraLauncher.launch(takePictureIntent);
+            });
+        }
+
+        btnSelectImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
             imagePickerLauncher.launch(intent);
         });
 
-        btnSubmitItem.setOnClickListener(view -> {
+        btnSubmitItem.setOnClickListener(v -> {
             String title = etItemTitle.getText().toString().trim();
             String message = etItemMessage.getText().toString().trim();
             String status = (rgStatus.getCheckedButtonId() == R.id.rbFound) ? "FOUND" : "LOST";
 
-            if (title.isEmpty() || message.isEmpty() || selectedImageUri == null) {
+            if (title.isEmpty() || message.isEmpty() || (existingItem == null && selectedImageUri == null)) {
                 Toast.makeText(this, "Please fill all fields and select an image!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -203,15 +247,20 @@ public class LostAndFoundActivity extends AppCompatActivity {
             String uploaderRoll = prefs.getString("LOGGED_IN_ROLL_NO", "Unknown Roll");
 
             ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Uploading...");
+            progressDialog.setMessage(existingItem == null ? "Uploading..." : "Updating...");
             progressDialog.setCancelable(false);
             progressDialog.show();
 
             new Thread(() -> {
-                String uploadedImageUrl = uploadImageToImgBB(selectedImageUri);
+                String finalImageUrl = existingItem != null ? existingItem.getImageUrl() : null;
+                if (selectedImageUri != null) {
+                    finalImageUrl = uploadImageToImgBB(selectedImageUri);
+                }
+
+                String finalUrl = finalImageUrl;
                 runOnUiThread(() -> {
-                    if (uploadedImageUrl != null) {
-                        saveToFirebase(null, title, status, uploaderName, uploaderRoll, message, uploadedImageUrl, dialog, progressDialog);
+                    if (finalUrl != null) {
+                        saveToFirebase(existingItem != null ? existingItem.getId() : null, title, status, uploaderName, uploaderRoll, message, finalUrl, bottomSheetDialog, progressDialog);
                     } else {
                         progressDialog.dismiss();
                         Toast.makeText(this, "Upload failed. Try again.", Toast.LENGTH_LONG).show();
@@ -220,89 +269,25 @@ public class LostAndFoundActivity extends AppCompatActivity {
             }).start();
         });
 
-        dialog.show();
+        bottomSheetDialog.show();
     }
 
-    private void showEditItemDialog(LostItem item) {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_add_item);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-
-        selectedImageUri = null;
-        dialogImageViewPreview = dialog.findViewById(R.id.ivSelectedImage);
-        Button btnSelectImage = dialog.findViewById(R.id.btnSelectImage);
-        Button btnSubmitItem = dialog.findViewById(R.id.btnSubmitItem);
-        EditText etItemTitle = dialog.findViewById(R.id.etItemTitle);
-        EditText etItemMessage = dialog.findViewById(R.id.etItemMessage);
-        MaterialButtonToggleGroup rgStatus = dialog.findViewById(R.id.rgStatus);
-
-        btnSubmitItem.setText("Update Post");
-        etItemTitle.setText(item.getTitle());
-        etItemMessage.setText(item.getMessage());
-        
-        if ("FOUND".equals(item.getStatus())) {
-            rgStatus.check(R.id.rbFound);
-        } else {
-            rgStatus.check(R.id.rbLost);
-        }
-        
-        Glide.with(this).load(item.getImageUrl()).into(dialogImageViewPreview);
-
-        btnSelectImage.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType("image/*");
-            imagePickerLauncher.launch(intent);
-        });
-
-        btnSubmitItem.setOnClickListener(view -> {
-            String newTitle = etItemTitle.getText().toString().trim();
-            String newMessage = etItemMessage.getText().toString().trim();
-            String newStatus = (rgStatus.getCheckedButtonId() == R.id.rbFound) ? "FOUND" : "LOST";
-
-            if (newTitle.isEmpty() || newMessage.isEmpty()) {
-                Toast.makeText(this, "Fields cannot be empty!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Updating...");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-
-            if (selectedImageUri != null) {
-                new Thread(() -> {
-                    String uploadedImageUrl = uploadImageToImgBB(selectedImageUri);
-                    runOnUiThread(() -> {
-                        if (uploadedImageUrl != null) {
-                            saveToFirebase(item.getId(), newTitle, newStatus, item.getUploaderName(), item.getUploaderRoll(), newMessage, uploadedImageUrl, dialog, progressDialog);
-                        } else {
-                            progressDialog.dismiss();
-                            Toast.makeText(this, "Image upload failed.", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }).start();
-            } else {
-                saveToFirebase(item.getId(), newTitle, newStatus, item.getUploaderName(), item.getUploaderRoll(), newMessage, item.getImageUrl(), dialog, progressDialog);
-            }
-        });
-
-        dialog.show();
+    private Uri getImageUri(Bitmap bitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "CapturedItem_" + System.currentTimeMillis(), null);
+        return Uri.parse(path);
     }
 
-    private void saveToFirebase(String existingId, String title, String status, String uploaderName, String uploaderRoll, String message, String imageUrl, Dialog dialog, ProgressDialog progressDialog) {
-        String pushId = (existingId != null) ? existingId : databaseReference.push().getKey();
-
+    private void saveToFirebase(String id, String title, String status, String uploaderName, String uploaderRoll, String message, String imageUrl, BottomSheetDialog dialog, ProgressDialog progressDialog) {
+        String pushId = (id != null) ? id : databaseReference.push().getKey();
         if (pushId != null) {
             long currentTime = System.currentTimeMillis();
             LostItem newItem = new LostItem(pushId, title, status, uploaderName, uploaderRoll, message, imageUrl, currentTime);
-
             databaseReference.child(pushId).setValue(newItem).addOnCompleteListener(task -> {
                 progressDialog.dismiss();
                 if (task.isSuccessful()) {
-                    Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Announcement Shared!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 } else {
                     Toast.makeText(this, "Firebase error.", Toast.LENGTH_SHORT).show();
