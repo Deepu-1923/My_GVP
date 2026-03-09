@@ -10,8 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.example.mygvp.LostAndFoundActivity;
 import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.*;
 
 public class FacultyDashboardActivity extends AppCompatActivity {
@@ -19,6 +21,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
     private TextView tvFacultyName;
     private DatabaseReference facultyRef;
     private CardView btnLogout;
+    private MaterialButton btnReportLost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +30,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
 
         tvFacultyName = findViewById(R.id.tvFacultyName);
         btnLogout = findViewById(R.id.btnLogout);
+        btnReportLost = findViewById(R.id.btnReportLost);
 
         String facultyId = getIntent().getStringExtra("facultyId");
 
@@ -52,6 +56,13 @@ public class FacultyDashboardActivity extends AppCompatActivity {
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+
+        if (btnReportLost != null) {
+            btnReportLost.setOnClickListener(v -> {
+                Intent intent = new Intent(FacultyDashboardActivity.this, LostAndFoundActivity.class);
+                startActivity(intent);
+            });
+        }
 
         btnLogout.setOnClickListener(v -> {
             SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);

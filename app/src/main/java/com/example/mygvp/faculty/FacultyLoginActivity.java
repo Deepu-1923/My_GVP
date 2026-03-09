@@ -1,6 +1,7 @@
 package com.example.mygvp.faculty;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,6 +67,16 @@ public class FacultyLoginActivity extends AppCompatActivity {
 
                                 // ✅ IMPORTANT: Get facultyId (fac01)
                                 String facultyId = facSnap.getKey();
+                                String facultyName = facSnap.child("name").getValue(String.class);
+
+                                // Save to SharedPreferences for Lost & Found and other modules
+                                SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putString("LOGGED_IN_FACULTY_ID", facultyId);
+                                editor.putString("LOGGED_IN_NAME", facultyName != null ? facultyName : "Faculty");
+                                editor.putString("LOGGED_IN_ROLL_NO", facultyId); // Using ID as "Roll No" for consistency in Lost & Found
+                                editor.putString("USER_TYPE", "FACULTY");
+                                editor.apply();
 
                                 // ✅ Pass facultyId to Dashboard
                                 Intent intent = new Intent(

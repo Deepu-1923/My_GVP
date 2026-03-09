@@ -2,6 +2,7 @@ package com.example.mygvp;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -59,6 +61,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
                     selectedImageUri = result.getData().getData();
                     if (dialogImageViewPreview != null) {
                         dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                        dialogImageViewPreview.setImageTintList(null);
                         dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
                         Glide.with(this).load(selectedImageUri).into(dialogImageViewPreview);
                     }
@@ -76,6 +79,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
                         selectedImageUri = getImageUri(imageBitmap);
                         if (dialogImageViewPreview != null) {
                             dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                            dialogImageViewPreview.setImageTintList(null);
                             dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
                             Glide.with(this).load(selectedImageUri).into(dialogImageViewPreview);
                         }
@@ -204,18 +208,23 @@ public class LostAndFoundActivity extends AppCompatActivity {
         MaterialButton btnSubmitItem = view.findViewById(R.id.btnSubmitItem);
         EditText etItemTitle = view.findViewById(R.id.etItemTitle);
         EditText etItemMessage = view.findViewById(R.id.etItemMessage);
+        TextView tvImageHint = view.findViewById(R.id.tvImageHint);
         MaterialButtonToggleGroup rgStatus = view.findViewById(R.id.rgStatus);
 
         if (existingItem != null) {
             btnSubmitItem.setText("Update Post");
             etItemTitle.setText(existingItem.getTitle());
             etItemMessage.setText(existingItem.getMessage());
+            if (tvImageHint != null) tvImageHint.setText("Replace the Item Photo");
+            
             if ("FOUND".equals(existingItem.getStatus())) rgStatus.check(R.id.rbFound);
             else rgStatus.check(R.id.rbLost);
-            Glide.with(this).load(existingItem.getImageUrl()).into(dialogImageViewPreview);
-            if (dialogImageViewPreview != null) {
+            
+            if (dialogImageViewPreview != null && existingItem.getImageUrl() != null) {
                 dialogImageViewPreview.setPadding(0, 0, 0, 0);
+                dialogImageViewPreview.setImageTintList(null);
                 dialogImageViewPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                Glide.with(this).load(existingItem.getImageUrl()).into(dialogImageViewPreview);
             }
         }
 

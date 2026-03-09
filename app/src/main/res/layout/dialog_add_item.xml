@@ -55,7 +55,8 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="Lost"
                 android:textAllCaps="false"
-                android:textColor="@color/error"
+                android:textColor="@color/chip_text_lost"
+                app:backgroundTint="@color/chip_bg_lost"
                 app:cornerRadius="16dp"
                 app:strokeColor="@color/error"
                 app:strokeWidth="1.5dp" />
@@ -69,7 +70,8 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="Found"
                 android:textAllCaps="false"
-                android:textColor="@color/warning"
+                android:textColor="@color/chip_text_found"
+                app:backgroundTint="@color/chip_bg_found"
                 app:cornerRadius="16dp"
                 app:strokeColor="@color/warning"
                 app:strokeWidth="1.5dp" />
@@ -129,7 +131,6 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
