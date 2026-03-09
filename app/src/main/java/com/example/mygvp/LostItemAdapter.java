@@ -105,7 +105,7 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         ImageView ivZoomedImage = dialog.findViewById(R.id.ivZoomedImage);
-        ImageButton btnCloseZoom = dialog.findViewById(R.id.btnCloseZoom);
+        View btnCloseZoom = dialog.findViewById(R.id.btnCloseZoom);
 
         Glide.with(context)
                 .load(imageUrl)
