@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupDashboard();
         setupContactInfo();
+        setupSocialMedia(); // Added this
 
         findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
     }
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         // 2. Faculty Directory
         View cardFaculty = findViewById(R.id.miniFaculty);
         setupCard(cardFaculty, "Faculty\nDirectory", android.R.drawable.ic_menu_my_calendar, R.color.bg_soft_blue);
-        cardFaculty.setOnClickListener(v -> startActivity(new Intent(this, CampusGalleryActivity.class)));
+        cardFaculty.setOnClickListener(v -> showFacultyBranchDialog());
 
         // 3. Administrative
         View cardAdmin = findViewById(R.id.miniAdmin);
@@ -133,6 +135,20 @@ public class MainActivity extends AppCompatActivity {
         if (iconBg != null) iconBg.setBackgroundTintList(getColorStateList(bgColorRes));
     }
 
+    private void showFacultyBranchDialog() {
+        String[] branches = {"CSE", "CSM", "Civil", "ECE", "Mech"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Department")
+                .setItems(branches, (dialog, which) -> {
+                    String selectedBranch = branches[which];
+                    Intent intent = new Intent(MainActivity.this, FacultyDirectoryActivity.class);
+                    intent.putExtra("BRANCH_NAME", selectedBranch);
+                    startActivity(intent);
+                })
+                .show();
+    }
+
     private void setupContactInfo() {
         List<ContactInfo> infoList = new ArrayList<>();
         infoList.add(new ContactInfo("📍 Address", "Gayatri Vidya Parishad College, Rushikonda, Visakhapatnam-530045.", android.R.drawable.ic_dialog_map));
@@ -141,6 +157,14 @@ public class MainActivity extends AppCompatActivity {
 
         rvContactInfo.setLayoutManager(new LinearLayoutManager(this));
         rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
+        rvContactInfo.setNestedScrollingEnabled(false);
+    }
+
+    private void setupSocialMedia() {
+        findViewById(R.id.btnFacebook).setOnClickListener(v -> openUrl("https://www.facebook.com/gvpcdpgca?modal=admin_todo_tour#", "Facebook"));
+        findViewById(R.id.btnInstagram).setOnClickListener(v -> openUrl("https://www.instagram.com/gvpcdpgca/?hl=en", "Instagram"));
+        findViewById(R.id.btnTwitter).setOnClickListener(v -> openUrl("https://x.com/gvpcdpgc", "Twitter"));
+        findViewById(R.id.btnYoutube).setOnClickListener(v -> openUrl("https://www.youtube.com/channel/UCpdY3Ro6iV_X-oO6ld3Mwdw/", "YouTube"));
     }
 
     private void showImageSliderPopup(List<Integer> images, List<String> titles) {
@@ -236,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchLatestCalendar() {
-        // Fetch the most recent academic calendar year entry
         dbRef.child("academic_calendar").orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

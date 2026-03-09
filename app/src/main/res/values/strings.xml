@@ -15,6 +15,11 @@
     <string name="payment">Fee Details</string>
     <string name="upload">Upload</string>
     <string name="view">View</string>
+<!--faculty card in home page-->
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 
     <!-- Home Page Strings -->
     <string name="welcome_to">Welcome to</string>

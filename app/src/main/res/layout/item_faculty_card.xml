@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="0dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +17,6 @@
         android:paddingTop="24dp"
         android:paddingBottom="24dp">
 
-        <!-- Profile Image with double border effect -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="120dp"
             android:layout_height="120dp"
@@ -31,18 +31,18 @@
                 android:layout_margin="3dp"
                 app:cardCornerRadius="57dp"
                 app:cardElevation="0dp">
-
                 <ImageView
-                    android:id="@+id/ivFacultyPhoto"
+                    android:id="@+id/ivFacultyImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="TODO"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_profile_placeholder" />
             </com.google.android.material.card.MaterialCardView>
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
-            android:id="@+id/tvFacultyName"
+            android:id="@+id/tvFacName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -53,20 +53,32 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/tvFacultyDesignation"
+            android:id="@+id/tvFacQual"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:alpha="0.8"
-            android:text="Designation"
+            android:text="Qualification"
             android:textColor="@color/accent"
             android:textSize="14sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/tvFacSpec"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:alpha="0.7"
+            android:text="Specialization"
+            android:textColor="@color/textSecondary"
+            android:textSize="13sp" />
+
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/tvFacultyEmail"
+            android:id="@+id/tvFacEmail"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,4 +96,4 @@
             app:iconTint="@color/textTertiary" />
 
     </LinearLayout>
-</LinearLayout>
+</androidx.cardview.widget.CardView>

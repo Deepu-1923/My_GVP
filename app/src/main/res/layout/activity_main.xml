@@ -30,13 +30,6 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_overlay_dark" />
 
-<!--            <androidx.appcompat.widget.Toolbar-->
-<!--                android:id="@+id/toolbar"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="?attr/actionBarSize"-->
-<!--                app:layout_collapseMode="pin">-->
-<!--            </androidx.appcompat.widget.Toolbar>-->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,17 +66,6 @@
                     android:layout_height="45dp"
                     android:layout_marginLeft="13dp"
                     android:src="@drawable/gvplogo"/>
-
-                <!--                    <com.google.android.material.imageview.ShapeableImageView-->
-                <!--                        android:id="@+id/btnProfile"-->
-                <!--                        android:layout_width="44dp"-->
-                <!--                        android:layout_height="44dp"-->
-                <!--                        android:layout_alignParentEnd="true"-->
-                <!--                        android:padding="4dp"-->
-                <!--                        android:src="@drawable/ic_profile_placeholder"-->
-                <!--                        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"-->
-                <!--                        android:background="@color/white"-->
-                <!--                        android:elevation="4dp" />-->
             </RelativeLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -204,8 +186,76 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvContactInfo"
                         android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:overScrollMode="never"/>
+                        android:layout_height="wrap_content"
+                        android:overScrollMode="never"
+                        android:nestedScrollingEnabled="false"/>
+
+                    <!-- Social Media Section -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="FOLLOW US"
+                        android:textColor="@color/accent"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.2"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageButton
+                            android:id="@+id/btnFacebook"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="#1A1877F2"
+                            android:padding="10dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_facebook"
+                            android:contentDescription="Facebook" />
+
+                        <ImageButton
+                            android:id="@+id/btnInstagram"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="#1AE4405F"
+                            android:padding="10dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_instagram"
+                            android:contentDescription="Instagram" />
+
+                        <ImageButton
+                            android:id="@+id/btnTwitter"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="#1A000000"
+                            android:padding="12dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_twitter"
+                            android:contentDescription="Twitter" />
+
+                        <ImageButton
+                            android:id="@+id/btnYoutube"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="#1AFF0000"
+                            android:padding="10dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_youtube"
+                            android:contentDescription="YouTube" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

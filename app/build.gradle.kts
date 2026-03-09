@@ -54,6 +54,7 @@ dependencies {
     implementation("com.sun.mail:android-activation:1.6.6")
 
     //git
+
     implementation("com.github.bumptech.glide:glide:4.16.0")
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
