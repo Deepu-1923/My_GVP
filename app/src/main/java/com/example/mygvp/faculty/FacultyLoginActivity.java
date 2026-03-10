@@ -32,80 +32,68 @@ public class FacultyLoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
-        facultyRef = FirebaseDatabase.getInstance()
-                .getReference("faculty");
+        // Reference to the "faculty" root node
+        facultyRef = FirebaseDatabase.getInstance().getReference("faculty");
 
         btnLogin.setOnClickListener(v -> loginFaculty());
     }
 
     private void loginFaculty() {
-
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this,
-                    "Enter email & password",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Enter email & password", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        facultyRef.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        facultyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean found = false;
+                // Outer loop: Iterate through Branches (CSE, ECE, etc.)
+                for (DataSnapshot branchSnap : snapshot.getChildren()) {
+                    String branchName = branchSnap.getKey();
+                    
+                    // Inner loop: Iterate through Faculty in that branch
+                    for (DataSnapshot facSnap : branchSnap.getChildren()) {
+                        String dbEmail = facSnap.child("email").getValue(String.class);
+                        String dbPassword = facSnap.child("password").getValue(String.class);
 
-                        for (DataSnapshot facSnap : snapshot.getChildren()) {
+                        if (email.equals(dbEmail) && password.equals(dbPassword)) {
+                            found = true;
+                            String facultyId = facSnap.getKey();
+                            String facultyName = facSnap.child("name").getValue(String.class);
 
-                            String dbEmail = facSnap.child("email")
-                                    .getValue(String.class);
-                            String dbPassword = facSnap.child("password")
-                                    .getValue(String.class);
+                            // Save to SharedPreferences
+                            SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("LOGGED_IN_FACULTY_ID", facultyId);
+                            editor.putString("LOGGED_IN_FACULTY_BRANCH", branchName); // Save branch for dashboard path
+                            editor.putString("LOGGED_IN_NAME", facultyName != null ? facultyName : "Faculty");
+                            editor.putString("USER_TYPE", "FACULTY");
+                            editor.apply();
 
-                            if (email.equals(dbEmail)
-                                    && password.equals(dbPassword)) {
-
-                                // ✅ IMPORTANT: Get facultyId (fac01)
-                                String facultyId = facSnap.getKey();
-                                String facultyName = facSnap.child("name").getValue(String.class);
-
-                                // Save to SharedPreferences for Lost & Found and other modules
-                                SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
-                                SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString("LOGGED_IN_FACULTY_ID", facultyId);
-                                editor.putString("LOGGED_IN_NAME", facultyName != null ? facultyName : "Faculty");
-                                editor.putString("LOGGED_IN_ROLL_NO", facultyId); // Using ID as "Roll No" for consistency in Lost & Found
-                                editor.putString("USER_TYPE", "FACULTY");
-                                editor.apply();
-
-                                // ✅ Pass facultyId to Dashboard
-                                Intent intent = new Intent(
-                                        FacultyLoginActivity.this,
-                                        FacultyDashboardActivity.class
-                                );
-
-                                intent.putExtra("facultyId", facultyId);
-                                startActivity(intent);
-                                finish();
-                                return;
-                            }
+                            // Pass details to Dashboard
+                            Intent intent = new Intent(FacultyLoginActivity.this, FacultyDashboardActivity.class);
+                            intent.putExtra("facultyId", facultyId);
+                            intent.putExtra("branch", branchName);
+                            startActivity(intent);
+                            finish();
+                            return;
                         }
-
-                        Toast.makeText(
-                                FacultyLoginActivity.this,
-                                "Invalid Faculty Credentials",
-                                Toast.LENGTH_SHORT
-                        ).show();
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(
-                                FacultyLoginActivity.this,
-                                "Database error",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
+                if (!found) {
+                    Toast.makeText(FacultyLoginActivity.this, "Invalid Faculty Credentials", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(FacultyLoginActivity.this, "Database error", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

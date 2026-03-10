@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupDashboard();
         setupContactInfo();
-        setupSocialMedia(); // Added this
+        setupSocialMedia();
 
         findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
     }
@@ -105,10 +105,12 @@ public class MainActivity extends AppCompatActivity {
         setupCard(cardFaculty, "Faculty\nDirectory", android.R.drawable.ic_menu_my_calendar, R.color.bg_soft_blue);
         cardFaculty.setOnClickListener(v -> showFacultyBranchDialog());
 
-        // 3. Administrative
-        View cardAdmin = findViewById(R.id.miniAdmin);
-        setupCard(cardAdmin, "Administrative", android.R.drawable.ic_menu_info_details, R.color.bg_soft_orange);
-        cardAdmin.setOnClickListener(v -> Toast.makeText(this, "Admin Services", Toast.LENGTH_SHORT).show());
+        // 3. Admissions (Updated from Administrative)
+        View cardAdmissions = findViewById(R.id.miniAdmin);
+        setupCard(cardAdmissions, "Admissions", android.R.drawable.ic_menu_info_details, R.color.bg_soft_orange);
+        cardAdmissions.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, AdmissionsActivity.class));
+        });
 
         // 4. Syllabus & Calendar
         View cardSyllabus = findViewById(R.id.miniSyllabus);

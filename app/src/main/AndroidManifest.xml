@@ -26,6 +26,7 @@
         <activity android:name=".FacultyDirectoryActivity"/>
 
         <activity android:name=".CampusGalleryActivity" />
+        <activity android:name=".AdmissionsActivity" />
 
         <activity android:name=".student.StudentLoginActivity"/>
         <activity android:name=".student.StudentDashboardActivity"/>
