@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary theme colors -->
-    <color name="primary">#1A1A1A</color>
-    <color name="primaryDark">#000000</color>
-    <color name="primaryLight">#424242</color>
+    <!-- Professional Palette -->
+    <color name="univ_primary">#1B365D</color>
+    <color name="univ_secondary">#4A628A</color>
+    <color name="univ_accent">#D4AF37</color>
 
-    <!-- Accent / Action Colors -->
-    <color name="accent">#5E17EB</color>
-    <color name="accent_light">#F3E5F5</color>
+    <!-- Dashboard Main Card (Reverted to Black/Dark) -->
+    <color name="dashboard_card_dark">#1A1A1A</color>
 
-    <!-- Dashboard Icon Backgrounds (Soft Tints) -->
+    <!-- Analytics Light Theme Colors -->
+    <color name="light_green">#81C784</color> <!-- Softer Green -->
+    <color name="light_red">#E57373</color>   <!-- Softer Red -->
+    <color name="light_blue">#64B5F6</color>  <!-- Softer Blue -->
+    <color name="light_gray_bg">#F5F7FA</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#F4F7F9</color>
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="success">#2DCC70</color>
+    <color name="error">#E74C3C</color>
+    <color name="warning">#F39C12</color>
+    <color name="info">#007AFF</color>
+
+    <!-- Dashboard Icon Backgrounds -->
     <color name="bg_soft_purple">#F3E5F5</color>
     <color name="bg_soft_blue">#E3F2FD</color>
     <color name="bg_soft_orange">#FFF3E0</color>
     <color name="bg_soft_green">#E8F5E9</color>
     <color name="bg_soft_red">#FFEBEE</color>
 
-    <!-- Status Colors -->
-    <color name="success">#34C759</color>
-    <color name="error">#FF3B30</color>
-    <color name="warning">#FF9500</color>
-    <color name="info">#007AFF</color>
-
-    <!-- Backgrounds -->
-    <color name="background">#F0F2F5</color>
-    <color name="cardBackground">#FFFFFF</color>
-    <color name="surface">#FFFFFF</color>
-
     <!-- Text Colors -->
-    <color name="textPrimary">#1A1A1A</color>
-    <color name="textSecondary">#666666</color>
-    <color name="textTertiary">#9E9E9E</color>
-    <color name="textOnPrimary">#FFFFFF</color>
+    <color name="textPrimary">#2C3E50</color>
+    <color name="textSecondary">#7F8C8D</color>
+    <color name="textTertiary">#BDC3C7</color>
 
-    <!-- Utility Colors -->
-    <color name="divider">#EEEEEE</color>
-    <color name="ripple">#10000000</color>
+    <!-- UI Elements -->
+    <color name="divider">#E5EAEF</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <!-- Legacy / Compatibility -->
-    <color name="lavender">#C6B7E2</color>
-    <color name="buttonText">#FFFFFF</color>
+    <!-- Theme Compatibility -->
+    <color name="primary">#1B365D</color>
+    <color name="primaryDark">#0D1B2E</color>
+    <color name="accent">#2E5BFF</color>
+    <color name="accent_light">#EBF0FF</color>
 </resources>

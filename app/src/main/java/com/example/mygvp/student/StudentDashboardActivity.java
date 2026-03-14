@@ -32,12 +32,12 @@ import com.google.firebase.database.ValueEventListener;
 public class StudentDashboardActivity extends AppCompatActivity {
 
     private TextView tvName;
-    private TextView tvResultStat;
+    private TextView tvResultStat, tvAttendanceStat;
     private ImageView imgProfile;
-    private CardView btnMenu;
+    private View btnMenu;
 
     private CardView cardAttendance, cardFee, cardAchievement,
-            cardResults, cardLostFound, cardSports;
+            cardResults, cardLostFound, cardAnalytics;
 
     private DatabaseReference studentRef;
     private String rollNo, branch, batch;
@@ -50,6 +50,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         // UI references
         tvName = findViewById(R.id.tvName);
         tvResultStat = findViewById(R.id.tvResultStat);
+        tvAttendanceStat = findViewById(R.id.tvAttendanceStat);
         imgProfile = findViewById(R.id.imgProfile);
         btnMenu = findViewById(R.id.btnMenu);
 
@@ -58,7 +59,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         cardAchievement = findViewById(R.id.cardAchievement);
         cardResults = findViewById(R.id.cardResults);
         cardLostFound = findViewById(R.id.cardLostFound);
-        cardSports = findViewById(R.id.cardSports);
+        cardAnalytics = findViewById(R.id.cardAnalytics);
 
         // Pull stored credentials
         SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
@@ -84,18 +85,13 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 .child(rollNo);
 
         loadStudentProfile();
-        loadLatestCGPA();
+        loadRealTimeStats();
         setupDashboardClicks();
     }
 
-    // --- UPDATED CLOUDINARY LOGIC ---
     private void loadStudentProfile() {
         String cloudName = "dlw4oisub";
-
-        // f_auto handles both JPG and PNG automatically!
         String transformations = "w_300,h_300,c_fill,q_auto,f_auto";
-
-        // This looks for the Roll Number as the Public ID in the main Cloudinary area
         String cloudinaryUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/" + transformations + "/" + rollNo;
 
         Glide.with(this)
@@ -106,8 +102,21 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 .into(imgProfile);
     }
 
-    // --- FETCH LATEST CGPA LOGIC ---
-    private void loadLatestCGPA() {
+    private void loadRealTimeStats() {
+        // 1. Load Real-time Attendance
+        studentRef.child("attendance_percentage").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    tvAttendanceStat.setText(snapshot.getValue().toString() + "%");
+                } else {
+                    tvAttendanceStat.setText("0%");
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // 2. Load Latest CGPA
         studentRef.child("results").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -119,7 +128,6 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 int maxYear = -1;
                 DataSnapshot latestYearSnapshot = null;
 
-                // Step 1: Find the highest year (1, 2, 3, or 4)
                 for (DataSnapshot yearSnap : snapshot.getChildren()) {
                     try {
                         int year = Integer.parseInt(yearSnap.getKey());
@@ -127,16 +135,13 @@ public class StudentDashboardActivity extends AppCompatActivity {
                             maxYear = year;
                             latestYearSnapshot = yearSnap;
                         }
-                    } catch (NumberFormatException e) {
-                        // Ignore any non-numeric nodes if they exist
-                    }
+                    } catch (NumberFormatException e) {}
                 }
 
                 if (latestYearSnapshot != null) {
                     int maxSemester = -1;
                     DataSnapshot latestSemesterSnapshot = null;
 
-                    // Step 2: Inside that highest year, find the highest semester (1 or 2)
                     for (DataSnapshot semSnap : latestYearSnapshot.getChildren()) {
                         try {
                             int sem = Integer.parseInt(semSnap.getKey());
@@ -144,12 +149,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
                                 maxSemester = sem;
                                 latestSemesterSnapshot = semSnap;
                             }
-                        } catch (NumberFormatException e) {
-                            // Ignore
-                        }
+                        } catch (NumberFormatException e) {}
                     }
 
-                    // Step 3: Extract the CGPA from that latest semester node
                     if (latestSemesterSnapshot != null) {
                         Object cgpaObj = latestSemesterSnapshot.child("cgpa").getValue();
                         if (cgpaObj != null) {
@@ -157,56 +159,60 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         } else {
                             tvResultStat.setText("--");
                         }
-                    } else {
-                        tvResultStat.setText("--");
                     }
-                } else {
-                    tvResultStat.setText("--");
                 }
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                tvResultStat.setText("--");
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void setupDashboardClicks() {
-        // Pop-up menu for the Hamburger icon
-        btnMenu.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(StudentDashboardActivity.this, btnMenu);
-            popupMenu.getMenu().add("Change Password");
-            popupMenu.getMenu().add("Logout");
+        if (btnMenu != null) {
+            btnMenu.setOnClickListener(v -> {
+                PopupMenu popupMenu = new PopupMenu(StudentDashboardActivity.this, btnMenu);
+                popupMenu.getMenu().add("Change Password");
+                popupMenu.getMenu().add("Logout");
 
-            popupMenu.setOnMenuItemClickListener(item -> {
-                if (item.getTitle().equals("Change Password")) {
-                    showChangePasswordDialog();
-                } else if (item.getTitle().equals("Logout")) {
-                    logoutUser();
-                }
-                return true;
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    if (item.getTitle().equals("Change Password")) {
+                        showChangePasswordDialog();
+                    } else if (item.getTitle().equals("Logout")) {
+                        logoutUser();
+                    }
+                    return true;
+                });
+                popupMenu.show();
             });
-            popupMenu.show();
-        });
+        }
 
-        cardResults.setOnClickListener(v -> {
-            Intent intent = new Intent(StudentDashboardActivity.this, StudentResultsActivity.class);
-            intent.putExtra("rollNo", rollNo);
-            startActivity(intent);
-        });
+        if (cardResults != null) {
+            cardResults.setOnClickListener(v -> {
+                Intent intent = new Intent(StudentDashboardActivity.this, StudentResultsActivity.class);
+                intent.putExtra("rollNo", rollNo);
+                startActivity(intent);
+            });
+        }
 
-        cardAchievement.setOnClickListener(v -> {
-            startActivity(new Intent(this, UploadAchievementActivity.class));
-        });
+        if (cardAchievement != null) {
+            cardAchievement.setOnClickListener(v -> {
+                startActivity(new Intent(this, UploadAchievementActivity.class));
+            });
+        }
 
-        cardLostFound.setOnClickListener(v -> {
-            startActivity(new Intent(StudentDashboardActivity.this, LostAndFoundActivity.class));
-        });
+        if (cardLostFound != null) {
+            cardLostFound.setOnClickListener(v -> {
+                startActivity(new Intent(StudentDashboardActivity.this, LostAndFoundActivity.class));
+            });
+        }
 
-        cardAttendance.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
-        cardFee.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
-        cardSports.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+        if (cardAnalytics != null) {
+            cardAnalytics.setOnClickListener(v -> {
+                startActivity(new Intent(StudentDashboardActivity.this, StudentAnalyticsActivity.class));
+            });
+        }
+
+        if (cardAttendance != null) cardAttendance.setOnClickListener(v -> Toast.makeText(this, "Attendance Info", Toast.LENGTH_SHORT).show());
+        if (cardFee != null) cardFee.setOnClickListener(v -> Toast.makeText(this, "Fee Payments", Toast.LENGTH_SHORT).show());
     }
 
     private void logoutUser() {

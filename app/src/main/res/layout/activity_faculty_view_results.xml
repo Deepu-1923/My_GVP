@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@android:drawable/ic_menu_revert"
-            app:title="Academic Results"
+            app:title="Search Results"
             app:titleTextColor="@color/textPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -54,10 +54,46 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="24dp"
-                        android:text="Select Session"
+                        android:text="Student Selection"
                         android:textColor="@color/textPrimary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Roll Number"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusTopStart="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRollNo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapCharacters" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Batch (e.g. 2025-29)"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusTopStart="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etBatch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -99,7 +135,7 @@
                         android:id="@+id/btnViewResult"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Fetch Results"
+                        android:text="Search Result"
                         android:textAllCaps="false"
                         android:textSize="16sp"
                         app:backgroundTint="@color/primary"
@@ -108,7 +144,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Results View -->
+            <!-- Results View (Same as Student side) -->
             <LinearLayout
                 android:id="@+id/layoutResult"
                 android:layout_width="match_parent"

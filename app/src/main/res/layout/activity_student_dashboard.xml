@@ -39,7 +39,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_toEndOf="@id/cardProfile"
+                android:layout_toStartOf="@id/btnMenu"
                 android:orientation="vertical">
 
                 <TextView
@@ -54,7 +56,9 @@
                     android:id="@+id/tvName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
                     android:text="Student Name"
                     android:textColor="@color/textPrimary"
                     android:textSize="20sp"
@@ -100,7 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="@color/primary"
+                app:cardBackgroundColor="@color/univ_primary"
                 app:cardCornerRadius="24dp">
 
                 <LinearLayout
@@ -362,7 +366,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardSports"
+                    android:id="@+id/cardAnalytics"
                     android:layout_width="0dp"
                     android:layout_height="140dp"
                     android:layout_columnWeight="1"
@@ -383,14 +387,14 @@
                             android:layout_height="48dp"
                             android:background="@drawable/bg_icon_circle_green"
                             android:padding="12dp"
-                            android:src="@drawable/ic_sports"
+                            android:src="@android:drawable/ic_menu_agenda"
                             app:tint="@color/success" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:text="Sports"
+                            android:text="Analytics"
                             android:textColor="@color/textPrimary"
                             android:textStyle="bold" />
                     </LinearLayout>

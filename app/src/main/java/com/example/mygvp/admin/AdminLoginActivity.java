@@ -1,13 +1,21 @@
 package com.example.mygvp.admin;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mygvp.R;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class AdminLoginActivity extends AppCompatActivity {
 
@@ -47,6 +55,12 @@ public class AdminLoginActivity extends AppCompatActivity {
                     String dbPassword = adminSnap.child("password").getValue(String.class);
 
                     if (email.equals(dbEmail) && password.equals(dbPassword)) {
+                        // Save to SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("USER_TYPE", "ADMIN");
+                        editor.apply();
+
                         startActivity(new Intent(AdminLoginActivity.this,
                                 AdminDashboardActivity.class));
                         finish();

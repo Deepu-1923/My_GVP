@@ -87,6 +87,7 @@ public class StudentLoginActivity extends AppCompatActivity {
                                 editor.putString("LOGGED_IN_NAME", studentName);
                                 editor.putString("LOGGED_IN_BRANCH", branch);
                                 editor.putString("LOGGED_IN_BATCH", batch);
+                                editor.putString("USER_TYPE", "STUDENT"); // Added this
                                 editor.apply();
 
                                 Toast.makeText(StudentLoginActivity.this, "Hello,\n" + studentName, Toast.LENGTH_SHORT).show();

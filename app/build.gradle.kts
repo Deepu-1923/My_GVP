@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mygvp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -49,19 +49,22 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.google.firebase:firebase-storage:20.3.0")
 
+    // Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Excel Processing (Apache POI)
+    implementation("org.apache.poi:poi:5.2.5")
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+
     // mail in Firebase
     implementation("com.sun.mail:android-mail:1.6.6")
     implementation("com.sun.mail:android-activation:1.6.6")
 
-    //git
-
-    implementation("com.github.bumptech.glide:glide:4.16.0")
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
 
-    //google services
+    // google services
     implementation("com.google.gms:google-services:4.4.2")
-
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))

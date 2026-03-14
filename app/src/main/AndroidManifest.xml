@@ -23,6 +23,8 @@
 
         <activity android:name=".faculty.FacultyLoginActivity"/>
         <activity android:name=".faculty.FacultyDashboardActivity"/>
+        <activity android:name=".faculty.FacultyUploadResultsActivity"/>
+        <activity android:name=".faculty.FacultyViewResultsActivity"/>
         <activity android:name=".FacultyDirectoryActivity"/>
 
         <activity android:name=".CampusGalleryActivity" />
@@ -30,6 +32,7 @@
 
         <activity android:name=".student.StudentLoginActivity"/>
         <activity android:name=".student.StudentDashboardActivity"/>
+        <activity android:name=".student.StudentAnalyticsActivity"/>
         <activity android:name=".student.StudentResultsActivity"/>
         <activity android:name=".student.ForgotPasswordActivity" />
         <activity android:name=".UploadAchievementActivity" />

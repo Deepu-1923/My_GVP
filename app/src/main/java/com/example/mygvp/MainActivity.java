@@ -2,6 +2,7 @@ package com.example.mygvp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -25,8 +26,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.mygvp.admin.AdminDashboardActivity;
 import com.example.mygvp.admin.AdminLoginActivity;
+import com.example.mygvp.faculty.FacultyDashboardActivity;
 import com.example.mygvp.faculty.FacultyLoginActivity;
+import com.example.mygvp.student.StudentDashboardActivity;
 import com.example.mygvp.student.StudentLoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -50,6 +54,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // --- Persistent Login Check ---
+        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+        String userType = prefs.getString("USER_TYPE", null);
+
+        if (userType != null) {
+            if (userType.equals("FACULTY")) {
+                startActivity(new Intent(this, FacultyDashboardActivity.class));
+            } else if (userType.equals("STUDENT")) {
+                startActivity(new Intent(this, StudentDashboardActivity.class));
+            } else if (userType.equals("ADMIN")) {
+                startActivity(new Intent(this, AdminDashboardActivity.class));
+            }
+            finish(); // Close MainActivity so user can't go back to it
+            return; // Stop further execution of this activity
+        }
+        // --------------------------
 
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
