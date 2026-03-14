@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.mygvp.LostAndFoundActivity;
 import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
+import com.example.mygvp.UploadAchievementActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.*;
 
@@ -104,7 +105,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
 
         if (btnUploadAchievements != null) {
             btnUploadAchievements.setOnClickListener(v -> 
-                Toast.makeText(this, "Achievement publishing coming soon", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, UploadAchievementActivity.class)));
         }
 
         if (btnReportLost != null) {

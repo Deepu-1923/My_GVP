@@ -66,9 +66,9 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
         SharedPreferences prefs = context.getSharedPreferences("MyGVP_UserPrefs", Context.MODE_PRIVATE);
         String myRoll = prefs.getString("LOGGED_IN_ROLL_NO", "");
 
-        if (item.getStatus().equals("RESOLVED") || item.getStatus().equals("CLAIMED")) {
+        if (item.getStatus().equals("RESOLVED") || item.getStatus().equals("CLAIMED") || item.getStatus().equals("ARCHIVED")) {
             holder.tvItemStatus.setTextColor(context.getColor(R.color.success));
-            holder.tvItemStatus.setBackgroundResource(R.drawable.bg_tag_found); // Reusing soft orange or similar if needed, but let's stick to defined ones
+            holder.tvItemStatus.setBackgroundResource(R.drawable.bg_tag_found);
             holder.btnAction.setVisibility(View.GONE);
             holder.btnEdit.setVisibility(View.GONE);
         } else {
@@ -86,10 +86,11 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
                 holder.btnAction.setText("Resolve");
                 holder.btnEdit.setOnClickListener(v -> editListener.onEditClick(item));
                 holder.btnAction.setOnClickListener(v -> {
-                    String newStatus = item.getStatus().equals("LOST") ? "RESOLVED" : "CLAIMED";
+                    // Mark as ARCHIVED instead of just RESOLVED/CLAIMED to trigger archival logic
+                    String newStatus = "ARCHIVED";
                     FirebaseDatabase.getInstance().getReference("LostAndFound").child(item.getId())
                             .child("status").setValue(newStatus)
-                            .addOnSuccessListener(aVoid -> Toast.makeText(context, "Resolved!", Toast.LENGTH_SHORT).show());
+                            .addOnSuccessListener(aVoid -> Toast.makeText(context, "Item Archived!", Toast.LENGTH_SHORT).show());
                 });
             } else {
                 holder.btnEdit.setVisibility(View.GONE);
@@ -125,13 +126,29 @@ public class LostItemAdapter extends RecyclerView.Adapter<LostItemAdapter.LostIt
         TextView tvContactEmail = dialog.findViewById(R.id.tvContactEmail);
         Button btnSendEmail = dialog.findViewById(R.id.btnSendEmail);
 
-        DatabaseReference studentRef = FirebaseDatabase.getInstance().getReference("students").child(uploaderRoll);
-        studentRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference studentRef = FirebaseDatabase.getInstance().getReference("students");
+        // We don't know the branch/batch here easily, but let's assume a flat search or handle it via a better query if possible.
+        // For now, let's keep it consistent with the previous search logic if it worked.
+        // Actually, the previous code used .child(uploaderRoll) directly on "students". 
+        // If the structure is students -> branch -> batch -> rollNo, this might need a search.
+        
+        FirebaseDatabase.getInstance().getReference("students").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String dbName = snapshot.child("name").getValue(String.class);
-                    String dbEmail = snapshot.child("email").getValue(String.class);
+                DataSnapshot targetStudent = null;
+                for (DataSnapshot branchSnap : snapshot.getChildren()) {
+                    for (DataSnapshot batchSnap : branchSnap.getChildren()) {
+                        if (batchSnap.hasChild(uploaderRoll)) {
+                            targetStudent = batchSnap.child(uploaderRoll);
+                            break;
+                        }
+                    }
+                    if (targetStudent != null) break;
+                }
+
+                if (targetStudent != null) {
+                    String dbName = targetStudent.child("name").getValue(String.class);
+                    String dbEmail = targetStudent.child("email").getValue(String.class);
                     if (dbName == null || dbName.isEmpty()) dbName = "Student";
 
                     tvContactName.setText(dbName + " (" + uploaderRoll + ")");

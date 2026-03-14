@@ -113,7 +113,6 @@ public class LostAndFoundActivity extends AppCompatActivity {
         adapter = new LostItemAdapter(displayList, item -> showItemBottomSheet(item));
         recyclerView.setAdapter(adapter);
 
-        // Navigation
         View navBack = findViewById(R.id.toolbar);
         if (navBack != null) {
             navBack.setOnClickListener(v -> finish());
@@ -127,6 +126,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
                     if (checkedId == R.id.chipAll) filterFeed("ALL");
                     else if (checkedId == R.id.chipLost) filterFeed("LOST");
                     else if (checkedId == R.id.chipFound) filterFeed("FOUND");
+                    else if (checkedId == R.id.chipArchive) filterFeed("ARCHIVED");
                 }
             });
         }
@@ -142,17 +142,23 @@ public class LostAndFoundActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 masterList.clear();
                 long currentTime = System.currentTimeMillis();
-                long threeDaysInMillis = 3L * 24 * 60 * 60 * 1000;
+                long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     try {
                         LostItem item = dataSnapshot.getValue(LostItem.class);
                         if (item != null && item.getId() != null) {
                             String status = item.getStatus() != null ? item.getStatus() : "LOST";
-                            boolean isResolved = status.equals("RESOLVED") || status.equals("CLAIMED");
-                            boolean isOlderThan3Days = (currentTime - item.getTimestamp()) > threeDaysInMillis;
-
-                            if (isResolved && isOlderThan3Days) continue;
+                            
+                            // Check for 30-day auto-deletion of resolved/archived items
+                            boolean isResolved = status.equals("ARCHIVED") || status.equals("RESOLVED") || status.equals("CLAIMED");
+                            if (isResolved) {
+                                if ((currentTime - item.getTimestamp()) > thirtyDaysInMillis) {
+                                    // Auto-delete from Firebase
+                                    databaseReference.child(item.getId()).removeValue();
+                                    continue;
+                                }
+                            }
                             masterList.add(item);
                         }
                     } catch (Exception e) {
@@ -178,6 +184,7 @@ public class LostAndFoundActivity extends AppCompatActivity {
         if (checkedId == R.id.chipAll) filterFeed("ALL");
         else if (checkedId == R.id.chipLost) filterFeed("LOST");
         else if (checkedId == R.id.chipFound) filterFeed("FOUND");
+        else if (checkedId == R.id.chipArchive) filterFeed("ARCHIVED");
         else filterFeed("ALL");
     }
 
@@ -185,11 +192,18 @@ public class LostAndFoundActivity extends AppCompatActivity {
         displayList.clear();
         for (LostItem item : masterList) {
             String status = item.getStatus() != null ? item.getStatus() : "";
+            boolean isArchived = status.equals("ARCHIVED") || status.equals("RESOLVED") || status.equals("CLAIMED");
+
             if (filterType.equals("ALL")) {
+                // "ALL" shows only active items
+                if (!isArchived) {
+                    displayList.add(item);
+                }
+            } else if (filterType.equals("LOST") && status.equals("LOST")) {
                 displayList.add(item);
-            } else if (filterType.equals("LOST") && (status.equals("LOST") || status.equals("RESOLVED"))) {
+            } else if (filterType.equals("FOUND") && status.equals("FOUND")) {
                 displayList.add(item);
-            } else if (filterType.equals("FOUND") && (status.equals("FOUND") || status.equals("CLAIMED"))) {
+            } else if (filterType.equals("ARCHIVED") && isArchived) {
                 displayList.add(item);
             }
         }

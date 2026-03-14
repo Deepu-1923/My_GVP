@@ -16,8 +16,26 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="My Achievements"
+            app:title="Achievements"
             app:titleTextColor="@color/textPrimary" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_search"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:hint="Search by Course Name"
+            app:startIconDrawable="@android:drawable/ic_menu_search">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -43,6 +61,7 @@
                 android:src="@drawable/gvplogo" />
 
             <TextView
+                android:id="@+id/tv_empty_msg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -50,17 +69,8 @@
                 android:gravity="center"
                 android:text="No Achievements Yet"
                 android:textColor="@color/textPrimary"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:alpha="0.6"
-                android:gravity="center"
-                android:text="Your success story starts here.\nUpload your first milestone."
-                android:textColor="@color/textSecondary"
-                android:textSize="14sp" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -76,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="24dp"
-            android:text="New Achievement"
+            android:text="Add Achievement"
             android:textAllCaps="false"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary"
@@ -85,14 +95,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Overlay Form (Simplified as a Modal approach) -->
         <ScrollView
             android:id="@+id/layout_upload_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/white"
-            android:visibility="gone"
-            tools:visibility="gone">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -101,60 +109,61 @@
                 android:padding="32dp">
 
                 <TextView
+                    android:id="@+id/tv_form_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="32dp"
-                    android:text="New Milestone"
+                    android:text="New Achievement"
                     android:textColor="@color/textPrimary"
                     android:textSize="26sp"
                     android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_course_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Course Name (Auto-filled via OCR)" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Category"
-                    android:textColor="@color/textSecondary"
-                    android:textSize="14sp" />
+                    android:text="Category" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="8dp"
                     app:strokeWidth="1dp">
-
                     <Spinner
                         android:id="@+id/spinner_type"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:paddingHorizontal="12dp" />
+                        android:layout_height="56dp" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Domain"
-                    android:textColor="@color/textSecondary"
-                    android:textSize="14sp" />
+                    android:text="Domain" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="32dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="8dp"
                     app:strokeWidth="1dp">
-
                     <Spinner
                         android:id="@+id/spinner_domain"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:paddingHorizontal="12dp" />
+                        android:layout_height="56dp" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.button.MaterialButton
@@ -163,31 +172,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Attach Certificate"
-                    android:textAllCaps="false"
-                    app:cornerRadius="20dp"
-                    app:icon="@android:drawable/ic_menu_upload"
-                    app:strokeColor="@color/primary"
-                    app:strokeWidth="2dp" />
+                    android:text="Select Image Certificate"
+                    android:textAllCaps="false" />
 
                 <TextView
                     android:id="@+id/tv_file_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="40dp"
-                    android:alpha="0.5"
+                    android:layout_marginBottom="24dp"
                     android:gravity="center"
-                    android:text="No file selected"
-                    android:textSize="12sp" />
+                    android:text="No file selected" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_submit_achievement"
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
-                    android:text="Publish Achievement"
-                    android:textAllCaps="false"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="20dp" />
+                    android:text="Save Achievement" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_cancel"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel" />
 
             </LinearLayout>
         </ScrollView>

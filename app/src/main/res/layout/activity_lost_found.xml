@@ -82,6 +82,17 @@
                     app:chipStrokeColor="@color/warning"
                     app:chipStrokeWidth="1.5dp" />
 
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipArchive"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Archive"
+                    android:textColor="@color/textSecondary"
+                    app:chipBackgroundColor="@color/bg_soft_green"
+                    app:chipStrokeColor="@color/success"
+                    app:chipStrokeWidth="1.5dp" />
+
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
     </com.google.android.material.appbar.AppBarLayout>

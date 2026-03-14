@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mygvp.R;
+import com.example.mygvp.UploadAchievementActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -24,10 +25,14 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
     private Context context;
     private List<Achievement> achievementList;
+    private boolean isGlobalView;
+    private String currentUserId;
 
-    public AchievementAdapter(Context context, List<Achievement> achievementList) {
+    public AchievementAdapter(Context context, List<Achievement> achievementList, boolean isGlobalView, String currentUserId) {
         this.context = context;
         this.achievementList = achievementList;
+        this.isGlobalView = isGlobalView;
+        this.currentUserId = currentUserId;
     }
 
     @NonNull
@@ -41,9 +46,18 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
     public void onBindViewHolder(@NonNull AchievementViewHolder holder, int position) {
         Achievement achievement = achievementList.get(position);
 
-        holder.tvType.setText(achievement.getType());
+        String title = achievement.getType();
+        if (achievement.getCourseName() != null && !achievement.getCourseName().isEmpty()) {
+            title += " - " + achievement.getCourseName();
+        }
+        holder.tvType.setText(title);
         holder.tvDomain.setText(achievement.getDomain());
-        holder.tvDate.setText("Verified on " + achievement.getDate());
+        
+        // Show "Certified: Name (Role)" instead of "Uploaded by..."
+        String certInfo = "Certified: " + achievement.getUploaderName();
+        certInfo += " (" + achievement.getUploaderType() + ")";
+        certInfo += " on " + achievement.getDate();
+        holder.tvDate.setText(certInfo);
 
         holder.btnView.setOnClickListener(v -> {
             if (achievement.getFileUrl() != null && !achievement.getFileUrl().isEmpty()) {
@@ -55,14 +69,27 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
             }
         });
 
+        // Only uploader can edit/delete their own
+        if (achievement.getUploaderId() != null && achievement.getUploaderId().equals(currentUserId)) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnEdit.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);
+        }
+
         holder.btnDelete.setOnClickListener(v -> {
             FirebaseDatabase.getInstance().getReference("achievements")
                     .child(achievement.getId())
                     .removeValue()
                     .addOnSuccessListener(aVoid -> Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show());
         });
-        
-        holder.btnEdit.setVisibility(View.GONE); // Simplified for now
+
+        holder.btnEdit.setOnClickListener(v -> {
+            if (context instanceof UploadAchievementActivity) {
+                ((UploadAchievementActivity) context).editAchievement(achievement);
+            }
+        });
     }
 
     @Override
