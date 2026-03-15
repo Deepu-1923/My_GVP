@@ -61,7 +61,9 @@ public class StudentLoginActivity extends AppCompatActivity {
                 boolean isFound = false;
 
                 for (DataSnapshot branchSnap : snapshot.getChildren()) {
+                    String branchKey = branchSnap.getKey();
                     for (DataSnapshot batchSnap : branchSnap.getChildren()) {
+                        String batchKey = batchSnap.getKey();
                         for (DataSnapshot studentSnap : batchSnap.getChildren()) {
 
                             String dbEmail = studentSnap.child("email").getValue(String.class);
@@ -72,8 +74,6 @@ public class StudentLoginActivity extends AppCompatActivity {
 
                                 String rollNo = studentSnap.getKey();
                                 String studentName = studentSnap.child("name").getValue(String.class);
-                                String branch = studentSnap.child("branch").getValue(String.class);
-                                String batch = studentSnap.child("batch").getValue(String.class);
 
                                 if (studentName == null || studentName.isEmpty()) {
                                     studentName = "Student";
@@ -85,9 +85,9 @@ public class StudentLoginActivity extends AppCompatActivity {
                                 SharedPreferences.Editor editor = prefs.edit();
                                 editor.putString("LOGGED_IN_ROLL_NO", rollNo);
                                 editor.putString("LOGGED_IN_NAME", studentName);
-                                editor.putString("LOGGED_IN_BRANCH", branch);
-                                editor.putString("LOGGED_IN_BATCH", batch);
-                                editor.putString("USER_TYPE", "STUDENT"); // Added this
+                                editor.putString("LOGGED_IN_BRANCH", branchKey);
+                                editor.putString("LOGGED_IN_BATCH", batchKey);
+                                editor.putString("USER_TYPE", "STUDENT");
                                 editor.apply();
 
                                 Toast.makeText(StudentLoginActivity.this, "Hello,\n" + studentName, Toast.LENGTH_SHORT).show();

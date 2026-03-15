@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.mygvp">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -17,35 +18,38 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
 
-        <activity android:name=".admin.AdminLoginActivity"/>
-        <activity android:name=".admin.AdminDashboardActivity"/>
-        <activity android:name=".AdminUploadActivity" />
-
-        <activity android:name=".faculty.FacultyLoginActivity"/>
-        <activity android:name=".faculty.FacultyDashboardActivity"/>
-        <activity android:name=".faculty.FacultyUploadResultsActivity"/>
-        <activity android:name=".faculty.FacultyViewResultsActivity"/>
-        <activity android:name=".FacultyDirectoryActivity"/>
-
-        <activity android:name=".CampusGalleryActivity" />
-        <activity android:name=".AdmissionsActivity" />
-
-        <activity android:name=".student.StudentLoginActivity"/>
-        <activity android:name=".student.StudentDashboardActivity"/>
-        <activity android:name=".student.StudentAnalyticsActivity"/>
-        <activity android:name=".student.StudentResultsActivity"/>
-        <activity android:name=".student.ForgotPasswordActivity" />
-        <activity android:name=".UploadAchievementActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".LostAndFoundActivity"/>
+        <activity android:name=".LostAndFoundActivity" />
+        <activity android:name=".FacultyDirectoryActivity" />
+        <activity android:name=".CampusGalleryActivity" />
+        <activity android:name=".AdmissionsActivity" />
+        <activity android:name=".UploadAchievementActivity" />
+        <activity android:name=".AdminUploadActivity" />
+
+        <activity android:name=".admin.AdminLoginActivity" />
+        <activity android:name=".admin.AdminDashboardActivity" />
+
+        <activity android:name=".faculty.FacultyLoginActivity" />
+        <activity android:name=".faculty.FacultyDashboardActivity" />
+        <activity android:name=".faculty.FacultyUploadResultsActivity" />
+        <activity android:name=".faculty.FacultyViewResultsActivity" />
+        <activity android:name=".faculty.FacultyUploadAttendanceActivity" />
+        <activity android:name=".faculty.FacultyViewAttendanceActivity" />
+
+        <activity android:name=".student.StudentLoginActivity" />
+        <activity android:name=".student.StudentDashboardActivity" />
+        <activity android:name=".student.StudentAnalyticsActivity" />
+        <activity android:name=".student.StudentResultsActivity" />
+        <activity android:name=".student.StudentAttendanceActivity" />
+        <activity android:name=".student.ForgotPasswordActivity" />
 
     </application>
 

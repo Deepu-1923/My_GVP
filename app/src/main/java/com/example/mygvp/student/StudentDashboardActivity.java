@@ -211,7 +211,20 @@ public class StudentDashboardActivity extends AppCompatActivity {
             });
         }
 
-        if (cardAttendance != null) cardAttendance.setOnClickListener(v -> Toast.makeText(this, "Attendance Info", Toast.LENGTH_SHORT).show());
+        if (cardAttendance != null) {
+            cardAttendance.setOnClickListener(v -> {
+                Intent intent = new Intent(StudentDashboardActivity.this, StudentAttendanceActivity.class);
+                intent.putExtra("rollNo", rollNo);
+                intent.putExtra("branch", branch);
+                intent.putExtra("batch", batch);
+                // For now, let's assume we want to see latest. 
+                // In a real app, you might have a selector.
+                intent.putExtra("year", "1"); 
+                intent.putExtra("sem", "1");
+                startActivity(intent);
+            });
+        }
+
         if (cardFee != null) cardFee.setOnClickListener(v -> Toast.makeText(this, "Fee Payments", Toast.LENGTH_SHORT).show());
     }
 

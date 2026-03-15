@@ -100,7 +100,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
 
         if (btnUploadAttendance != null) {
             btnUploadAttendance.setOnClickListener(v -> 
-                Toast.makeText(this, "Attendance module coming soon", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, FacultyViewAttendanceActivity.class)));
         }
 
         if (btnUploadAchievements != null) {
