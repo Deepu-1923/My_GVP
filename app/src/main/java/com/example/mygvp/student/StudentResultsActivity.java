@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class StudentResultsActivity extends AppCompatActivity {
@@ -129,6 +130,17 @@ public class StudentResultsActivity extends AppCompatActivity {
                     
                     subjectList.add(new SubjectModel(name, credits, grade, points));
                 }
+
+                // SORTING LOGIC: Subjects with more credits (3.0) first, Labs (1.5) last
+                Collections.sort(subjectList, (s1, s2) -> {
+                    try {
+                        double c1 = Double.parseDouble(s1.credits);
+                        double c2 = Double.parseDouble(s2.credits);
+                        return Double.compare(c2, c1); // Descending order
+                    } catch (Exception e) {
+                        return 0;
+                    }
+                });
 
                 rvSubjects.setAdapter(new SubjectAdapter(subjectList));
 

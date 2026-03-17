@@ -1,11 +1,14 @@
 package com.example.mygvp;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,13 +64,29 @@ public class FacultyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             fHolder.tvName.setText(faculty.getName() != null ? faculty.getName() : "N/A");
             fHolder.tvQual.setText(faculty.getQualification() != null ? faculty.getQualification() : "N/A");
             fHolder.tvSpec.setText(faculty.getSpecialization() != null ? faculty.getSpecialization() : "N/A");
-            fHolder.tvEmail.setText(faculty.getEmail() != null ? faculty.getEmail() : "N/A");
+            
+            String email = faculty.getEmail();
+            fHolder.tvEmail.setText(email != null ? email : "N/A");
+
+            // Redirect to send email when clicking on the email button
+            fHolder.tvEmail.setOnClickListener(v -> {
+                if (email != null && !email.isEmpty() && !email.equals("N/A")) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:" + email));
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Query to Faculty");
+                    try {
+                        context.startActivity(Intent.createChooser(intent, "Send Email..."));
+                    } catch (android.content.ActivityNotFoundException ex) {
+                        Toast.makeText(context, "No email clients installed.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
             // Load Cloudinary image using Glide
             if (faculty.getImageUrl() != null && !faculty.getImageUrl().isEmpty()) {
                 Glide.with(context)
                         .load(faculty.getImageUrl())
-                        .placeholder(R.drawable.ic_profile_placeholder) // Keep your placeholder
+                        .placeholder(R.drawable.ic_profile_placeholder)
                         .into(fHolder.ivImage);
             } else {
                 fHolder.ivImage.setImageResource(R.drawable.ic_profile_placeholder);

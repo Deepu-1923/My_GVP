@@ -1,11 +1,15 @@
 package com.example.mygvp.student;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -34,7 +38,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private TextView tvName;
     private TextView tvResultStat, tvAttendanceStat;
     private ImageView imgProfile;
-    private View btnMenu;
+    private View btnMenu, btnBack;
+    private View loadingOverlay;
+    private ImageView ivBus;
 
     private CardView cardAttendance, cardFee, cardAchievement,
             cardResults, cardLostFound, cardAnalytics;
@@ -53,6 +59,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
         tvAttendanceStat = findViewById(R.id.tvAttendanceStat);
         imgProfile = findViewById(R.id.imgProfile);
         btnMenu = findViewById(R.id.btnMenu);
+        btnBack = findViewById(R.id.btnBack);
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        ivBus = findViewById(R.id.ivBus);
 
         cardAttendance = findViewById(R.id.cardAttendance);
         cardFee = findViewById(R.id.cardFee);
@@ -60,6 +69,12 @@ public class StudentDashboardActivity extends AppCompatActivity {
         cardResults = findViewById(R.id.cardResults);
         cardLostFound = findViewById(R.id.cardLostFound);
         cardAnalytics = findViewById(R.id.cardAnalytics);
+
+        // Show loading immediately
+        if (loadingOverlay != null) {
+            loadingOverlay.setVisibility(View.VISIBLE);
+            startBusAnimation();
+        }
 
         // Pull stored credentials
         SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
@@ -74,19 +89,35 @@ public class StudentDashboardActivity extends AppCompatActivity {
             return;
         }
 
-        // Set the name IMMEDIATELY from what we saved during login
         tvName.setText(studentName);
-
-        // Correct Firebase path: students > CSE > 2025-29 > 5251411001
-        studentRef = FirebaseDatabase.getInstance()
-                .getReference("students")
-                .child(branch)
-                .child(batch)
-                .child(rollNo);
+        studentRef = FirebaseDatabase.getInstance().getReference("students").child(branch).child(batch).child(rollNo);
 
         loadStudentProfile();
         loadRealTimeStats();
         setupDashboardClicks();
+
+        // Hide overlay after 1.5 seconds
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (loadingOverlay != null) {
+                loadingOverlay.animate()
+                        .alpha(0f)
+                        .setDuration(400)
+                        .withEndAction(() -> loadingOverlay.setVisibility(View.GONE))
+                        .start();
+            }
+        }, 1500);
+    }
+
+    private void startBusAnimation() {
+        if (ivBus != null) {
+            // Move bus from Left (-350) to Right (350)
+            ObjectAnimator animator = ObjectAnimator.ofFloat(ivBus, "translationX", -350f, 350f);
+            animator.setDuration(1500); // Updated to match display time
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.setRepeatMode(ValueAnimator.RESTART);
+            animator.setInterpolator(new LinearInterpolator());
+            animator.start();
+        }
     }
 
     private void loadStudentProfile() {
@@ -103,62 +134,22 @@ public class StudentDashboardActivity extends AppCompatActivity {
     }
 
     private void loadRealTimeStats() {
-        // 1. Load Real-time Attendance
         studentRef.child("attendance_percentage").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    tvAttendanceStat.setText(snapshot.getValue().toString() + "%");
-                } else {
-                    tvAttendanceStat.setText("0%");
-                }
+                if (snapshot.exists()) tvAttendanceStat.setText(snapshot.getValue().toString() + "%");
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        // 2. Load Latest CGPA
         studentRef.child("results").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    tvResultStat.setText("--");
-                    return;
-                }
-
-                int maxYear = -1;
-                DataSnapshot latestYearSnapshot = null;
-
+                if (!snapshot.exists()) return;
                 for (DataSnapshot yearSnap : snapshot.getChildren()) {
-                    try {
-                        int year = Integer.parseInt(yearSnap.getKey());
-                        if (year > maxYear) {
-                            maxYear = year;
-                            latestYearSnapshot = yearSnap;
-                        }
-                    } catch (NumberFormatException e) {}
-                }
-
-                if (latestYearSnapshot != null) {
-                    int maxSemester = -1;
-                    DataSnapshot latestSemesterSnapshot = null;
-
-                    for (DataSnapshot semSnap : latestYearSnapshot.getChildren()) {
-                        try {
-                            int sem = Integer.parseInt(semSnap.getKey());
-                            if (sem > maxSemester) {
-                                maxSemester = sem;
-                                latestSemesterSnapshot = semSnap;
-                            }
-                        } catch (NumberFormatException e) {}
-                    }
-
-                    if (latestSemesterSnapshot != null) {
-                        Object cgpaObj = latestSemesterSnapshot.child("cgpa").getValue();
-                        if (cgpaObj != null) {
-                            tvResultStat.setText(String.valueOf(cgpaObj));
-                        } else {
-                            tvResultStat.setText("--");
-                        }
+                    for (DataSnapshot semSnap : yearSnap.getChildren()) {
+                        Object cgpa = semSnap.child("cgpa").getValue();
+                        if (cgpa != null) tvResultStat.setText(String.valueOf(cgpa));
                     }
                 }
             }
@@ -167,18 +158,18 @@ public class StudentDashboardActivity extends AppCompatActivity {
     }
 
     private void setupDashboardClicks() {
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         if (btnMenu != null) {
             btnMenu.setOnClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(StudentDashboardActivity.this, btnMenu);
                 popupMenu.getMenu().add("Change Password");
                 popupMenu.getMenu().add("Logout");
-
                 popupMenu.setOnMenuItemClickListener(item -> {
-                    if (item.getTitle().equals("Change Password")) {
-                        showChangePasswordDialog();
-                    } else if (item.getTitle().equals("Logout")) {
-                        logoutUser();
-                    }
+                    if (item.getTitle().equals("Change Password")) showChangePasswordDialog();
+                    else if (item.getTitle().equals("Logout")) logoutUser();
                     return true;
                 });
                 popupMenu.show();
@@ -231,7 +222,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private void logoutUser() {
         SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
         prefs.edit().clear().apply();
-        Intent intent = new Intent(StudentDashboardActivity.this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -239,38 +230,22 @@ public class StudentDashboardActivity extends AppCompatActivity {
 
     private void showChangePasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_change_password, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
         builder.setView(dialogView);
-
         TextInputEditText etOldPass = dialogView.findViewById(R.id.etOldPassword);
         TextInputEditText etNewPass = dialogView.findViewById(R.id.etNewPassword);
         MaterialButton btnUpdate = dialogView.findViewById(R.id.btnConfirmUpdate);
-
         AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         btnUpdate.setOnClickListener(v -> {
             String oldP = etOldPass.getText().toString().trim();
             String newP = etNewPass.getText().toString().trim();
-
-            if (oldP.isEmpty() || newP.isEmpty()) {
-                Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
+            if (oldP.isEmpty() || newP.isEmpty()) return;
             studentRef.child("password").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (oldP.equals(snapshot.getValue(String.class))) {
-                        studentRef.child("password").setValue(newP).addOnSuccessListener(aVoid -> {
-                            Toast.makeText(StudentDashboardActivity.this, "Success", Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
-                        });
-                    } else {
-                        etOldPass.setError("Wrong password");
+                        studentRef.child("password").setValue(newP).addOnSuccessListener(aVoid -> dialog.dismiss());
                     }
                 }
                 @Override public void onCancelled(@NonNull DatabaseError error) {}

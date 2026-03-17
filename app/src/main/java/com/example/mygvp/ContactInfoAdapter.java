@@ -15,9 +15,15 @@ import java.util.List;
 public class ContactInfoAdapter extends RecyclerView.Adapter<ContactInfoAdapter.ViewHolder> {
 
     private List<ContactInfo> infoList;
+    private OnItemClickListener listener;
 
-    public ContactInfoAdapter(List<ContactInfo> infoList) {
+    public interface OnItemClickListener {
+        void onItemClick(String content);
+    }
+
+    public ContactInfoAdapter(List<ContactInfo> infoList, OnItemClickListener listener) {
         this.infoList = infoList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -34,7 +40,7 @@ public class ContactInfoAdapter extends RecyclerView.Adapter<ContactInfoAdapter.
         holder.tvContent.setText(item.getContent());
         holder.ivIcon.setImageResource(item.getIconResId());
 
-        // --- NEW: Click listeners for Maps, Email, and Phone! ---
+        // --- NEW: Click listeners for Maps, Email, Phone, and Website! ---
         holder.itemView.setOnClickListener(v -> {
             try {
                 if (item.getTitle().contains("Address")) {
@@ -53,6 +59,9 @@ public class ContactInfoAdapter extends RecyclerView.Adapter<ContactInfoAdapter.
                     // Opens Phone Dialer
                     Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:08912783722"));
                     v.getContext().startActivity(dialIntent);
+                } else if (item.getTitle().contains("Website") && listener != null) {
+                    // Opens Website using the provided listener
+                    listener.onItemClick(item.getContent());
                 }
             } catch (Exception e) {
                 // Prevents the app from crashing if the user doesn't have a map/email app installed

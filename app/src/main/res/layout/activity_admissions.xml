@@ -16,9 +16,10 @@
             android:id="@+id/toolbarAdmissions"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
-            app:title="Admissions 2024"
-            app:titleTextColor="@color/textPrimary" />
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:title="Admissions"
+            app:titleTextColor="@color/textPrimary"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView

@@ -16,7 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:navigationIcon="@drawable/ic_back_custom"
             app:title="Search Results"
             app:titleTextColor="@color/textPrimary" />
     </com.google.android.material.appbar.AppBarLayout>

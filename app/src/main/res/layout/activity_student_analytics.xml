@@ -16,9 +16,9 @@
             android:id="@+id/toolbarAnalytics"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:navigationIcon="@drawable/ic_back_custom"
             app:title="Personal Analytics"
-            app:titleTextColor="@color/univ_primary" />
+            app:titleTextColor="@color/textPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -37,10 +37,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
@@ -54,27 +52,25 @@
                         android:layout_height="wrap_content"
                         android:text="Overall Attendance"
                         android:textColor="@color/textPrimary"
-                        android:textSize="16sp"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/attendancePieChart"
                         android:layout_width="match_parent"
-                        android:layout_height="220dp"
+                        android:layout_height="250dp"
                         android:layout_marginTop="16dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Results Line Chart Card -->
+            <!-- Results Bar Chart Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
@@ -88,13 +84,13 @@
                         android:layout_height="wrap_content"
                         android:text="Academic Performance (GPA)"
                         android:textColor="@color/textPrimary"
-                        android:textSize="16sp"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/resultsLineChart"
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/resultsBarChart"
                         android:layout_width="match_parent"
-                        android:layout_height="250dp"
+                        android:layout_height="300dp"
                         android:layout_marginTop="16dp" />
 
                 </LinearLayout>
@@ -113,9 +109,7 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
+                    app:cardElevation="2dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -128,7 +122,6 @@
                             android:text="Achievements"
                             android:textSize="10sp"
                             android:textAllCaps="true"
-                            android:letterSpacing="0.05"
                             android:textColor="@color/textSecondary"/>
                         <TextView
                             android:id="@+id/tvAchievementCount"
@@ -137,7 +130,7 @@
                             android:text="0"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/univ_primary"/>
+                            android:textColor="@color/accent"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -147,9 +140,7 @@
                     android:layout_weight="1"
                     android:layout_marginHorizontal="4dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
+                    app:cardElevation="2dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -162,7 +153,6 @@
                             android:text="Backlogs"
                             android:textSize="10sp"
                             android:textAllCaps="true"
-                            android:letterSpacing="0.05"
                             android:textColor="@color/textSecondary"/>
                         <TextView
                             android:id="@+id/tvBacklogs"
@@ -181,9 +171,7 @@
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
+                    app:cardElevation="2dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -193,19 +181,18 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Current Year"
+                            android:text="Year"
                             android:textSize="10sp"
                             android:textAllCaps="true"
-                            android:letterSpacing="0.05"
                             android:textColor="@color/textSecondary"/>
                         <TextView
                             android:id="@+id/tvCurrentYear"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="--"
-                            android:textSize="15sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/univ_secondary"/>
+                            android:textColor="@color/primary"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

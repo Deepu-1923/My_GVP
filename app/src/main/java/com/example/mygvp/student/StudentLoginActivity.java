@@ -60,10 +60,15 @@ public class StudentLoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean isFound = false;
 
+                // Loop through branches (e.g., CSE, ECE)
                 for (DataSnapshot branchSnap : snapshot.getChildren()) {
                     String branchKey = branchSnap.getKey();
+                    
+                    // Loop through batches (e.g., 2025-29)
                     for (DataSnapshot batchSnap : branchSnap.getChildren()) {
                         String batchKey = batchSnap.getKey();
+                        
+                        // Loop through individual students
                         for (DataSnapshot studentSnap : batchSnap.getChildren()) {
 
                             String dbEmail = studentSnap.child("email").getValue(String.class);
@@ -75,6 +80,13 @@ public class StudentLoginActivity extends AppCompatActivity {
                                 String rollNo = studentSnap.getKey();
                                 String studentName = studentSnap.child("name").getValue(String.class);
 
+                                // If the fields 'branch' or 'batch' are not inside the node, use the parent keys
+                                String studentBranch = studentSnap.child("branch").getValue(String.class);
+                                if (studentBranch == null) studentBranch = branchKey;
+                                
+                                String studentBatch = studentSnap.child("batch").getValue(String.class);
+                                if (studentBatch == null) studentBatch = batchKey;
+
                                 if (studentName == null || studentName.isEmpty()) {
                                     studentName = "Student";
                                 } else {
@@ -85,12 +97,12 @@ public class StudentLoginActivity extends AppCompatActivity {
                                 SharedPreferences.Editor editor = prefs.edit();
                                 editor.putString("LOGGED_IN_ROLL_NO", rollNo);
                                 editor.putString("LOGGED_IN_NAME", studentName);
-                                editor.putString("LOGGED_IN_BRANCH", branchKey);
-                                editor.putString("LOGGED_IN_BATCH", batchKey);
+                                editor.putString("LOGGED_IN_BRANCH", studentBranch);
+                                editor.putString("LOGGED_IN_BATCH", studentBatch);
                                 editor.putString("USER_TYPE", "STUDENT");
                                 editor.apply();
 
-                                Toast.makeText(StudentLoginActivity.this, "Hello,\n" + studentName, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(StudentLoginActivity.this, "Hello, " + studentName, Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(StudentLoginActivity.this, StudentDashboardActivity.class);
                                 intent.putExtra("rollNo", rollNo);

@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_back_white"
+            app:navigationIcon="@drawable/ic_back_custom"
             app:navigationIconTint="@color/univ_primary"
             app:title="View Attendance"
             app:titleTextColor="@color/univ_primary" />

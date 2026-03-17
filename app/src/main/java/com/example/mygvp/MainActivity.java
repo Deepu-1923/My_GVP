@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -159,17 +158,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showFacultyBranchDialog() {
-        String[] branches = {"CSE", "CSM", "Civil", "ECE", "Mech"};
+        List<String> branches = Arrays.asList("CSE", "CSM", "Civil", "ECE", "Mech");
 
-        new AlertDialog.Builder(this)
-                .setTitle("Select Department")
-                .setItems(branches, (dialog, which) -> {
-                    String selectedBranch = branches[which];
-                    Intent intent = new Intent(MainActivity.this, FacultyDirectoryActivity.class);
-                    intent.putExtra("BRANCH_NAME", selectedBranch);
-                    startActivity(intent);
-                })
-                .show();
+        BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_department_selection, null);
+        dialog.setContentView(view);
+
+        RecyclerView rvDepartments = view.findViewById(R.id.rvDepartments);
+        rvDepartments.setLayoutManager(new LinearLayoutManager(this));
+        
+        DepartmentAdapter adapter = new DepartmentAdapter(branches, selectedBranch -> {
+            Intent intent = new Intent(MainActivity.this, FacultyDirectoryActivity.class);
+            intent.putExtra("BRANCH_NAME", selectedBranch);
+            startActivity(intent);
+            dialog.dismiss();
+        });
+        
+        rvDepartments.setAdapter(adapter);
+        dialog.show();
     }
 
     private void setupContactInfo() {
@@ -179,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         infoList.add(new ContactInfo("📞 Contact", "0891-2783722 / 2955084", android.R.drawable.ic_menu_call));
 
         rvContactInfo.setLayoutManager(new LinearLayoutManager(this));
-        rvContactInfo.setAdapter(new ContactInfoAdapter(infoList));
+        rvContactInfo.setAdapter(new ContactInfoAdapter(infoList, this::openUrl));
         rvContactInfo.setNestedScrollingEnabled(false);
     }
 
@@ -188,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnInstagram).setOnClickListener(v -> openUrl("https://www.instagram.com/gvpcdpgca/?hl=en", "Instagram"));
         findViewById(R.id.btnTwitter).setOnClickListener(v -> openUrl("https://x.com/gvpcdpgc", "Twitter"));
         findViewById(R.id.btnYoutube).setOnClickListener(v -> openUrl("https://www.youtube.com/channel/UCpdY3Ro6iV_X-oO6ld3Mwdw/", "YouTube"));
+        findViewById(R.id.btnLinkedin).setOnClickListener(v -> openUrl("https://www.linkedin.com/school/gvpcdpgc-mba/", "LinkedIn"));
     }
 
     private void showImageSliderPopup(List<Integer> images, List<String> titles) {
@@ -237,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showSyllabusBottomSheet() {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_syllabus, null);
         dialog.setContentView(view);
 
@@ -270,80 +277,91 @@ public class MainActivity extends AppCompatActivity {
             String branch = spinnerBranch.getText().toString();
             String year = spinnerYear.getText().toString();
             String sem = spinnerSem.getText().toString();
-            fetchAndOpen("syllabus/" + year + "/" + sem + "/" + branch, "Syllabus");
+            downloadSyllabus(branch, year, sem);
             dialog.dismiss();
         });
 
         btnCalendar.setOnClickListener(v -> {
-            fetchLatestCalendar();
+            downloadCalendar();
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void fetchLatestCalendar() {
-        dbRef.child("academic_calendar").orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void downloadSyllabus(String branch, String year, String sem) {
+        String dbPath = "Syllabus/" + branch + "/" + year + "/" + sem;
+        dbRef.child(dbPath).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        String url = ds.getValue(String.class);
-                        openUrl(url, "Academic Calendar (" + ds.getKey() + ")");
-                    }
+                    String url = snapshot.getValue(String.class);
+                    openUrl(url);
                 } else {
-                    Toast.makeText(MainActivity.this, "Calendar not uploaded yet.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Syllabus not found for " + branch, Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 
-    private void fetchAndOpen(String path, String type) {
-        dbRef.child(path).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void downloadCalendar() {
+        dbRef.child("AcademicCalendar").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String url = snapshot.getValue(String.class);
-                if (url != null && !url.isEmpty()) {
-                    openUrl(url, type);
+                if (snapshot.exists()) {
+                    String url = snapshot.getValue(String.class);
+                    openUrl(url);
                 } else {
-                    Toast.makeText(MainActivity.this, type + " not available for this selection.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Calendar not found", Toast.LENGTH_SHORT).show();
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
             }
         });
     }
 
-    private void openUrl(String url, String title) {
+    private void openUrl(String url) {
+        if (url == null || url.isEmpty()) return;
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+    }
+
+    private void openUrl(String url, String platform) {
         try {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(browserIntent);
-            Toast.makeText(this, "Opening " + title, Toast.LENGTH_SHORT).show();
+            openUrl(url);
         } catch (Exception e) {
-            Toast.makeText(this, "Could not open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Could not open " + platform, Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showLoginBottomSheet() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        // Correcting layout name to bottom_sheet_login and button IDs
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_login, null);
         bottomSheetDialog.setContentView(bottomSheetView);
 
         bottomSheetView.findViewById(R.id.bsBtnAdmin).setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, AdminLoginActivity.class));
+            bottomSheetDialog.dismiss();
         });
 
         bottomSheetView.findViewById(R.id.bsBtnFaculty).setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, FacultyLoginActivity.class));
+            bottomSheetDialog.dismiss();
         });
 
         bottomSheetView.findViewById(R.id.bsBtnStudent).setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
             startActivity(new Intent(MainActivity.this, StudentLoginActivity.class));
+            bottomSheetDialog.dismiss();
         });
 
         bottomSheetDialog.show();
