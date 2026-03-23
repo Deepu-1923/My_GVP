@@ -8,6 +8,13 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:name=".MyApplication"
@@ -36,6 +43,8 @@
 
         <activity android:name=".admin.AdminLoginActivity" />
         <activity android:name=".admin.AdminDashboardActivity" />
+        <activity android:name=".admin.AdminViewFeesActivity" />
+        <activity android:name=".admin.AdminManageFeesActivity" />
 
         <activity android:name=".faculty.FacultyLoginActivity" />
         <activity android:name=".faculty.FacultyDashboardActivity" />
