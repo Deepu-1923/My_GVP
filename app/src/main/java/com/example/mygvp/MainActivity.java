@@ -49,27 +49,11 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvContactInfo;
     private Handler sliderHandler = new Handler(Looper.getMainLooper());
     private Runnable sliderRunnable;
+    private MaterialButton btnPortal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // --- Persistent Login Check ---
-        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
-        String userType = prefs.getString("USER_TYPE", null);
-
-        if (userType != null) {
-            if (userType.equals("FACULTY")) {
-                startActivity(new Intent(this, FacultyDashboardActivity.class));
-            } else if (userType.equals("STUDENT")) {
-                startActivity(new Intent(this, StudentDashboardActivity.class));
-            } else if (userType.equals("ADMIN")) {
-                startActivity(new Intent(this, AdminDashboardActivity.class));
-            }
-            finish(); // Close MainActivity so user can't go back to it
-            return; // Stop further execution of this activity
-        }
-        // --------------------------
 
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -85,12 +69,48 @@ public class MainActivity extends AppCompatActivity {
         }
 
         rvContactInfo = findViewById(R.id.rvContactInfo);
+        btnPortal = findViewById(R.id.btnLaunchPortals);
 
         setupDashboard();
         setupContactInfo();
         setupSocialMedia();
+    }
 
-        findViewById(R.id.btnLaunchPortals).setOnClickListener(v -> showLoginBottomSheet());
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updatePortalButton();
+    }
+
+    private void updatePortalButton() {
+        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
+        String userType = prefs.getString("USER_TYPE", null);
+
+        if (userType != null) {
+            btnPortal.setText("View Dashboard");
+            // Using a more suitable, professional icon from the system
+            btnPortal.setIconResource(android.R.drawable.ic_menu_view);
+            btnPortal.setIconSize(48); // Making it smaller/standard
+            btnPortal.setOnClickListener(v -> {
+                Intent intent;
+                if (userType.equals("FACULTY")) {
+                    intent = new Intent(this, FacultyDashboardActivity.class);
+                } else if (userType.equals("STUDENT")) {
+                    intent = new Intent(this, StudentDashboardActivity.class);
+                } else if (userType.equals("ADMIN")) {
+                    intent = new Intent(this, AdminDashboardActivity.class);
+                } else {
+                    showLoginBottomSheet();
+                    return;
+                }
+                startActivity(intent);
+            });
+        } else {
+            btnPortal.setText("Launch Portals");
+            btnPortal.setIconResource(android.R.drawable.ic_lock_lock);
+            btnPortal.setIconSize(48);
+            btnPortal.setOnClickListener(v -> showLoginBottomSheet());
+        }
     }
 
     private void setupDashboard() {
@@ -344,7 +364,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLoginBottomSheet() {
-        // Correcting layout name to bottom_sheet_login and button IDs
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_login, null);
         bottomSheetDialog.setContentView(bottomSheetView);

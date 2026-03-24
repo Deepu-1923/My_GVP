@@ -42,23 +42,16 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/primary" />
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="12dp"
-                    android:src="@android:drawable/ic_lock_lock"
-                    app:tint="@color/primary" />
-            </com.google.android.material.card.MaterialCardView>
         </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -81,7 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 app:cardBackgroundColor="@color/primary"
-                app:cardCornerRadius="24dp">
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -106,9 +100,10 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tvTotalUsers"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1.2k"
+                            android:text="..."
                             android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -380,18 +375,6 @@
                 </com.google.android.material.card.MaterialCardView>
 
             </GridLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogout"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginTop="32dp"
-                android:text="Sign Out of Control"
-                android:textAllCaps="false"
-                android:textColor="@color/error"
-                app:cornerRadius="20dp"
-                app:strokeColor="@color/error" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

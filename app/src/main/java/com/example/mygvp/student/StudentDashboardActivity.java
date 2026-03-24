@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.mygvp.LostAndFoundActivity;
 import com.example.mygvp.MainActivity;
@@ -53,7 +55,6 @@ public class StudentDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_dashboard);
 
-        // UI references
         tvName = findViewById(R.id.tvName);
         tvResultStat = findViewById(R.id.tvResultStat);
         tvAttendanceStat = findViewById(R.id.tvAttendanceStat);
@@ -70,13 +71,11 @@ public class StudentDashboardActivity extends AppCompatActivity {
         cardLostFound = findViewById(R.id.cardLostFound);
         cardAnalytics = findViewById(R.id.cardAnalytics);
 
-        // Show loading immediately
         if (loadingOverlay != null) {
             loadingOverlay.setVisibility(View.VISIBLE);
             startBusAnimation();
         }
 
-        // Pull stored credentials
         SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
         rollNo = prefs.getString("LOGGED_IN_ROLL_NO", "");
         String studentName = prefs.getString("LOGGED_IN_NAME", "Student");
@@ -96,23 +95,17 @@ public class StudentDashboardActivity extends AppCompatActivity {
         loadRealTimeStats();
         setupDashboardClicks();
 
-        // Hide overlay after 1.5 seconds
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (loadingOverlay != null) {
-                loadingOverlay.animate()
-                        .alpha(0f)
-                        .setDuration(400)
-                        .withEndAction(() -> loadingOverlay.setVisibility(View.GONE))
-                        .start();
+                loadingOverlay.animate().alpha(0f).setDuration(400).withEndAction(() -> loadingOverlay.setVisibility(View.GONE)).start();
             }
         }, 1500);
     }
 
     private void startBusAnimation() {
         if (ivBus != null) {
-            // Move bus from Left (-350) to Right (350)
             ObjectAnimator animator = ObjectAnimator.ofFloat(ivBus, "translationX", -350f, 350f);
-            animator.setDuration(1500); // Updated to match display time
+            animator.setDuration(1500); 
             animator.setRepeatCount(ValueAnimator.INFINITE);
             animator.setRepeatMode(ValueAnimator.RESTART);
             animator.setInterpolator(new LinearInterpolator());
@@ -121,15 +114,60 @@ public class StudentDashboardActivity extends AppCompatActivity {
     }
 
     private void loadStudentProfile() {
-        String cloudName = "dlw4oisub";
-        String transformations = "w_300,h_300,c_fill,q_auto,f_auto";
-        String cloudinaryUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/" + transformations + "/" + rollNo;
+        studentRef.child("profile_image_url").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String imageUrl = snapshot.getValue(String.class);
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    renderImage(imageUrl);
+                } else {
+                    String cloudName = "dlw4oisub";
+                    String baseUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/w_300,h_300,c_fill,g_face,q_auto,f_auto/";
+                    
+                    String b = branch.trim().toUpperCase();
+                    String t = batch.trim();
+                    String r = rollNo.trim();
 
+                    // Multiple patterns to try based on Cloudinary structure
+                    String path1 = "students/" + b + "/" + t + "/" + r + ".jpg";
+                    String path2 = b + "/" + t + "/" + r + ".jpg";
+                    String path3 = r + ".jpg";
+
+                    Log.d("ProfileImage", "Trying Path 1: " + baseUrl + path1);
+                    Log.d("ProfileImage", "Trying Path 2: " + baseUrl + path2);
+                    Log.d("ProfileImage", "Trying Path 3: " + baseUrl + path3);
+                    
+                    Glide.with(StudentDashboardActivity.this)
+                            .load(baseUrl + path1)
+                            .apply(RequestOptions.circleCropTransform())
+                            .placeholder(R.drawable.ic_profile_placeholder)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .error(
+                                Glide.with(StudentDashboardActivity.this)
+                                        .load(baseUrl + path2)
+                                        .apply(RequestOptions.circleCropTransform())
+                                        .error(
+                                            Glide.with(StudentDashboardActivity.this)
+                                                    .load(baseUrl + path3)
+                                                    .apply(RequestOptions.circleCropTransform())
+                                                    .error(R.drawable.ic_profile_placeholder)
+                                        )
+                            )
+                            .into(imgProfile);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) { renderImage(null); }
+        });
+    }
+
+    private void renderImage(String url) {
+        if (isFinishing() || url == null) return;
         Glide.with(this)
-                .load(cloudinaryUrl)
+                .load(url)
                 .apply(RequestOptions.circleCropTransform())
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_profile_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imgProfile);
     }
 
@@ -158,10 +196,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     }
 
     private void setupDashboardClicks() {
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
-
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
         if (btnMenu != null) {
             btnMenu.setOnClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(StudentDashboardActivity.this, btnMenu);
@@ -178,44 +213,25 @@ public class StudentDashboardActivity extends AppCompatActivity {
 
         if (cardResults != null) {
             cardResults.setOnClickListener(v -> {
-                Intent intent = new Intent(StudentDashboardActivity.this, StudentResultsActivity.class);
+                Intent intent = new Intent(this, StudentResultsActivity.class);
                 intent.putExtra("rollNo", rollNo);
                 startActivity(intent);
             });
         }
-
-        if (cardAchievement != null) {
-            cardAchievement.setOnClickListener(v -> {
-                startActivity(new Intent(this, UploadAchievementActivity.class));
-            });
-        }
-
-        if (cardLostFound != null) {
-            cardLostFound.setOnClickListener(v -> {
-                startActivity(new Intent(StudentDashboardActivity.this, LostAndFoundActivity.class));
-            });
-        }
-
-        if (cardAnalytics != null) {
-            cardAnalytics.setOnClickListener(v -> {
-                startActivity(new Intent(StudentDashboardActivity.this, StudentAnalyticsActivity.class));
-            });
-        }
-
+        if (cardAchievement != null) cardAchievement.setOnClickListener(v -> startActivity(new Intent(this, UploadAchievementActivity.class)));
+        if (cardLostFound != null) cardLostFound.setOnClickListener(v -> startActivity(new Intent(this, LostAndFoundActivity.class)));
+        if (cardAnalytics != null) cardAnalytics.setOnClickListener(v -> startActivity(new Intent(this, StudentAnalyticsActivity.class)));
         if (cardAttendance != null) {
             cardAttendance.setOnClickListener(v -> {
-                Intent intent = new Intent(StudentDashboardActivity.this, StudentAttendanceActivity.class);
+                Intent intent = new Intent(this, StudentAttendanceActivity.class);
                 intent.putExtra("rollNo", rollNo);
                 intent.putExtra("branch", branch);
                 intent.putExtra("batch", batch);
-                // For now, let's assume we want to see latest. 
-                // In a real app, you might have a selector.
                 intent.putExtra("year", "1"); 
                 intent.putExtra("sem", "1");
                 startActivity(intent);
             });
         }
-
         if (cardFee != null) cardFee.setOnClickListener(v -> Toast.makeText(this, "Fee Payments", Toast.LENGTH_SHORT).show());
     }
 

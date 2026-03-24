@@ -1,128 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:paddingTop="@dimen/app_top_margin">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Admin Upload Portal"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:textColor="@color/primary"/>
-
-        <RadioGroup
-            android:id="@+id/rgUploadType"
+        android:background="@color/primary">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-            <RadioButton
-                android:id="@+id/rbSyllabus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Syllabus"
-                android:checked="true"/>
-            <RadioButton
-                android:id="@+id/rbCalendar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Academic Calendar"
-                android:layout_marginStart="16dp"/>
-        </RadioGroup>
+            android:layout_height="?attr/actionBarSize"
+            app:title="Broadcast Notices"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp">
 
         <LinearLayout
-            android:id="@+id/llSyllabusFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Select Year">
-                <AutoCompleteTextView
-                    android:id="@+id/uploadSpinnerYear"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Select Semester">
-                <AutoCompleteTextView
-                    android:id="@+id/uploadSpinnerSem"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Select Branch">
-                <AutoCompleteTextView
-                    android:id="@+id/uploadSpinnerBranch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notice Configuration"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:layout_marginBottom="20dp"/>
+
+                    <RadioGroup
+                        android:id="@+id/rgUploadType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="20dp">
+                        <RadioButton
+                            android:id="@+id/rbSyllabus"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Syllabus"
+                            android:checked="true"
+                            android:buttonTint="@color/primary"/>
+                        <RadioButton
+                            android:id="@+id/rbCalendar"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Academic Calendar"
+                            android:buttonTint="@color/primary"/>
+                    </RadioGroup>
+
+                    <LinearLayout
+                        android:id="@+id/llSyllabusFields"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:hint="Select Year"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary">
+                            <AutoCompleteTextView
+                                android:id="@+id/uploadSpinnerYear"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:hint="Select Semester"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary">
+                            <AutoCompleteTextView
+                                android:id="@+id/uploadSpinnerSem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:hint="Select Branch"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/primary">
+                            <AutoCompleteTextView
+                                android:id="@+id/uploadSpinnerBranch"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilCalendarYear"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Calendar Year (e.g. 2025-26)"
+                        android:visibility="gone"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etCalendarYear"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSelectUploadFile"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Select PDF File"
+                        android:layout_marginBottom="16dp"
+                        app:cornerRadius="12dp"
+                        android:textColor="@color/primary"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/primary"
+                        app:icon="@drawable/ic_upload_file"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/primary"/>
+
+                    <TextView
+                        android:id="@+id/tvUploadStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No file selected"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="24dp"
+                        android:textColor="@color/textSecondary"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStartUpload"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Broadcast Notice"
+                        app:cornerRadius="12dp"
+                        android:backgroundTint="@color/primary"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:elevation="4dp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilCalendarYear"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="Calendar Year (e.g. 2025-26)"
-            android:visibility="gone">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCalendarYear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/btnSelectUploadFile"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Select PDF File"
-            android:layout_marginBottom="16dp"
-            app:cornerRadius="12dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <TextView
-            android:id="@+id/tvUploadStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No file selected"
-            android:layout_gravity="center"
-            android:layout_marginBottom="32dp"/>
-
-        <Button
-            android:id="@+id/btnStartUpload"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Upload to Cloud &amp; Firebase"
-            app:cornerRadius="12dp"
-            android:backgroundTint="@color/accent"/>
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</LinearLayout>

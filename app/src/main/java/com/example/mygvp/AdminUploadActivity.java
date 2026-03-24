@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
@@ -60,6 +61,14 @@ public class AdminUploadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_upload);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Broadcast Notices");
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         rgType = findViewById(R.id.rgUploadType);
         llSyllabus = findViewById(R.id.llSyllabusFields);
@@ -114,7 +123,7 @@ public class AdminUploadActivity extends AppCompatActivity {
                 tvStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
                 Toast.makeText(this, "File too large! File-size Limit is 10MB.", Toast.LENGTH_LONG).show();
             } else {
-                tvStatus.setTextColor(getResources().getColor(android.R.color.black));
+                tvStatus.setTextColor(getResources().getColor(R.color.textSecondary));
             }
         }
     }
@@ -230,6 +239,6 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setText("Upload Another");
         selectedFileUri = null;
         tvStatus.setText("No file selected");
-        tvStatus.setTextColor(getResources().getColor(android.R.color.black));
+        tvStatus.setTextColor(getResources().getColor(R.color.textSecondary));
     }
 }

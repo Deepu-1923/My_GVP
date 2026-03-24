@@ -45,6 +45,10 @@
         <activity android:name=".admin.AdminDashboardActivity" />
         <activity android:name=".admin.AdminViewFeesActivity" />
         <activity android:name=".admin.AdminManageFeesActivity" />
+        <activity android:name=".admin.AdminManageStudentsActivity" />
+        <activity android:name=".admin.AdminEditStudentActivity" />
+        <activity android:name=".admin.AdminManageFacultyActivity" />
+        <activity android:name=".admin.AdminEditFacultyActivity" />
 
         <activity android:name=".faculty.FacultyLoginActivity" />
         <activity android:name=".faculty.FacultyDashboardActivity" />

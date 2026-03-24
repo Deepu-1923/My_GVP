@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -74,10 +75,9 @@ public class FacultyLoginActivity extends AppCompatActivity {
                             editor.putString("USER_TYPE", "FACULTY");
                             editor.apply();
 
-                            // Pass details to Dashboard
-                            Intent intent = new Intent(FacultyLoginActivity.this, FacultyDashboardActivity.class);
-                            intent.putExtra("facultyId", facultyId);
-                            intent.putExtra("branch", branchName);
+                            // Redirect to MainActivity (Home) after login
+                            Intent intent = new Intent(FacultyLoginActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                             finish();
                             return;

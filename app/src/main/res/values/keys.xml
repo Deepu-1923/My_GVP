@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="imgbb_api_key">c1f3c10ea2a0b2c488bc79f65debf52f</string>
+        <!-- Update with your mail and the new 16-char code -->
+        <string name="sender_email">5221411038@gvpcdpgc.edu.in</string>
+        <string name="sender_password">amcmjnredhidapua</string>
+        <string name="imgbb_api_key">c1f3c10ea2a0b2c488bc79f65debf52f</string>
 </resources>

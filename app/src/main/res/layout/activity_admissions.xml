@@ -1,95 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/background"
-    android:fitsSystemWindows="true">
+    android:paddingTop="@dimen/app_top_margin">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:elevation="0dp">
-
+        android:background="@color/white">
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarAdmissions"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_arrow_back"
             app:title="Admissions"
-            app:titleTextColor="@color/textPrimary"
-            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+            app:titleTextColor="@color/univ_primary" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAdmissions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:fontFamily="sans-serif-medium"
-                android:text="Engineering Programmes"
-                android:textColor="@color/accent"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <!-- Card for B.Tech Civil -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course1" />
-
-            <!-- Card for B.Tech CSE -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course2" />
-
-            <!-- Card for B.Tech CSM -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course3" />
-
-            <!-- Card for B.Tech ECE -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course4" />
-
-            <!-- Card for B.Tech Mech -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course5" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:fontFamily="sans-serif-medium"
-                android:text="Post Graduate Programmes"
-                android:textColor="@color/accent"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <!-- Card for M.Tech Structural -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course6" />
-
-            <!-- Card for M.Tech CST -->
-            <include
-                layout="@layout/item_admission_course"
-                android:id="@+id/course7" />
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:clipToPadding="false"
+        android:padding="8dp" />
+</LinearLayout>
