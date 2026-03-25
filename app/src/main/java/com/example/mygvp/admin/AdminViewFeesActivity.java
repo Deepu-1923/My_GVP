@@ -56,12 +56,17 @@ public class AdminViewFeesActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
         btnSubmit.setOnClickListener(v -> loadActualDataFromFirebase());
 
-        // Check for pre-filled data (e.g. redirected from Manage Fees)
-        String preBatch = getIntent().getStringExtra("PRE_BATCH");
-        String preStream = getIntent().getStringExtra("PRE_STREAM");
+        // Check for pre-filled data (e.g. redirected from Manage Fees or Select Fees)
+        String preBatch = getIntent().getStringExtra("BATCH");
+        String preStream = getIntent().getStringExtra("STREAM");
+        String preYear = getIntent().getStringExtra("YEAR");
+        String preSem = getIntent().getStringExtra("SEM");
+
         if (preBatch != null && preStream != null) {
             spinnerBatch.setText(preBatch, false);
             spinnerStream.setText(preStream, false);
+            if (preYear != null) spinnerYear.setText(preYear, false);
+            if (preSem != null) spinnerSem.setText(preSem, false);
             loadActualDataFromFirebase();
         }
     }
@@ -79,7 +84,6 @@ public class AdminViewFeesActivity extends AppCompatActivity {
         tvStatPaid = findViewById(R.id.tvStatPaid);
         tvStatDues = findViewById(R.id.tvStatDues);
         
-        // Hide/Remove the OCR/Gallery search button as requested
         ImageButton btnOcrSearch = findViewById(R.id.btnOcrSearch);
         if (btnOcrSearch != null) {
             btnOcrSearch.setVisibility(View.GONE);
@@ -115,9 +119,11 @@ public class AdminViewFeesActivity extends AppCompatActivity {
     private void loadActualDataFromFirebase() {
         String batch = spinnerBatch.getText().toString().trim();
         String stream = spinnerStream.getText().toString().trim();
+        String year = spinnerYear.getText().toString().trim();
+        String sem = spinnerSem.getText().toString().trim();
         
-        if (batch.isEmpty() || stream.isEmpty()) {
-            Toast.makeText(this, "Please select Batch and Stream", Toast.LENGTH_SHORT).show();
+        if (batch.isEmpty() || stream.isEmpty() || year.isEmpty() || sem.isEmpty()) {
+            Toast.makeText(this, "Please select all configuration details", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -127,26 +133,36 @@ public class AdminViewFeesActivity extends AppCompatActivity {
                 allFees.clear();
                 if (snapshot.exists()) {
                     for (DataSnapshot studentSnap : snapshot.getChildren()) {
-                        String rollNo = studentSnap.getKey();
-                        String name = studentSnap.child("name").getValue(String.class);
-                        
-                        Double totalFee = studentSnap.child("totalFee").getValue(Double.class);
-                        if (totalFee == null) totalFee = 0.0;
-                        
-                        Double paidAmount = studentSnap.child("paidAmount").getValue(Double.class);
-                        if (paidAmount == null) paidAmount = 0.0;
-                        
-                        Double dueAmount = studentSnap.child("dueAmount").getValue(Double.class);
-                        if (dueAmount == null) dueAmount = totalFee - paidAmount;
+                        String sYear = studentSnap.child("year").getValue(String.class);
+                        String sSem = studentSnap.child("semester").getValue(String.class);
 
-                        allFees.add(new StudentFee(rollNo, name, totalFee, paidAmount, dueAmount));
+                        if (year.equals(sYear) && sem.equals(sSem)) {
+                            String rollNo = studentSnap.getKey();
+                            String name = studentSnap.child("name").getValue(String.class);
+                            
+                            Double totalFee = studentSnap.child("totalFee").getValue(Double.class);
+                            if (totalFee == null) totalFee = 0.0;
+                            
+                            Double paidAmount = studentSnap.child("paidAmount").getValue(Double.class);
+                            if (paidAmount == null) paidAmount = 0.0;
+                            
+                            Double dueAmount = studentSnap.child("dueAmount").getValue(Double.class);
+                            if (dueAmount == null) dueAmount = Math.max(0, totalFee - paidAmount);
+
+                            allFees.add(new StudentFee(rollNo, name, totalFee, paidAmount, dueAmount));
+                        }
                     }
                     
                     Collections.sort(allFees, (f1, f2) -> f1.getRollNumber().compareTo(f2.getRollNumber()));
                     
-                    scrollViewResults.setVisibility(View.VISIBLE);
-                    updateStats();
-                    applyFilters();
+                    if (allFees.isEmpty()) {
+                        scrollViewResults.setVisibility(View.GONE);
+                        Toast.makeText(AdminViewFeesActivity.this, "No records found for selected Year/Sem", Toast.LENGTH_SHORT).show();
+                    } else {
+                        scrollViewResults.setVisibility(View.VISIBLE);
+                        updateStats();
+                        applyFilters();
+                    }
                 } else {
                     scrollViewResults.setVisibility(View.GONE);
                     Toast.makeText(AdminViewFeesActivity.this, "No students found for this batch", Toast.LENGTH_SHORT).show();

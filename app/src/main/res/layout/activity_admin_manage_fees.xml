@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:paddingTop="@dimen/app_top_margin">
+    android:background="@color/background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -46,72 +45,147 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/primary"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="12dp"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                <!-- Mandatory Note -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Select Stream"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerStream"
+                    app:cardBackgroundColor="#FFF3E0"
+                    app:cardCornerRadius="8dp"
+                    app:strokeColor="#FFE0B2"
+                    app:strokeWidth="1dp">
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:hint="Select Batch"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerBatch"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:hint="Select Year"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerYear"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Select Semester"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerSem"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_info"
+                            app:tint="#E65100"
+                            android:layout_marginEnd="8dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="MANDATORY: Excel must have headers in order: Roll Number, Name, Branch, Batch, Fees Paid, Fees Due."
+                            android:textColor="#E65100"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:hint="Stream"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerStream"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:hint="Batch"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerBatch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Year"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerYear"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Semester"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerSem"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnUploadExcel"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="SELECT EXCEL FILE"
+                    android:textColor="@color/primary"
+                    app:strokeColor="@color/primary"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_upload_file"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/primary"/>
+
+                <TextView
+                    android:id="@+id/tvExcelFileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="No file selected"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp"
+                    android:visibility="visible"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnViewFees"
@@ -126,31 +200,17 @@
                         app:cornerRadius="12dp" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUploadExcel"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:id="@+id/btnSubmitFees"
                         android:layout_width="0dp"
                         android:layout_height="56dp"
                         android:layout_weight="1"
-                        android:text="UPLOAD EXCEL"
+                        android:text="SUBMIT"
                         android:layout_marginStart="4dp"
-                        android:textColor="@color/primary"
-                        app:strokeColor="@color/primary"
-                        app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_upload_file"
-                        app:iconGravity="textStart"
-                        app:iconTint="@color/primary"/>
+                        android:backgroundTint="@color/primary"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvExcelFileName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:text="No file selected"
-                    android:textColor="@color/textSecondary"
-                    android:textSize="12sp"
-                    android:visibility="gone"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

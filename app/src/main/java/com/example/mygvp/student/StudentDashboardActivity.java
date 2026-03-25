@@ -168,7 +168,8 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        tryUrl(baseUrl, paths, index + 1);
+                        // Use imgProfile.post() to ensure we're out of Glide's callback lifecycle
+                        imgProfile.post(() -> tryUrl(baseUrl, paths, index + 1));
                         return true; 
                     }
 

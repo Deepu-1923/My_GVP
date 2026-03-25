@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:paddingTop="32dp"
+                android:paddingTop="9dp"
                 android:paddingBottom="24dp"
                 android:clipToPadding="false">
 
@@ -32,7 +32,8 @@
                     android:id="@+id/btnBack"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_centerVertical="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="4dp"
                     android:padding="8dp"
                     android:src="@drawable/ic_arrow_back"
                     app:tint="@color/univ_primary"
@@ -323,7 +324,7 @@
                                 style="@style/Widget.MaterialComponents.Button.TextButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Publish"
+                                android:text="Manage"
                                 android:textAllCaps="false"
                                 android:textColor="@color/accent" />
                         </LinearLayout>
