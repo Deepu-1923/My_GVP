@@ -32,6 +32,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
+
 public class FacultyDashboardActivity extends AppCompatActivity {
 
     private TextView tvFacultyName, tvStudentsManaged, tvAvgAttendance;
@@ -77,7 +79,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
 
         facultyRef = FirebaseDatabase.getInstance().getReference("faculty").child(branch).child(facultyId);
 
-        loadProfileAndStats();
+        loadProfileAndStats(branch);
         setupClicks();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -87,7 +89,7 @@ public class FacultyDashboardActivity extends AppCompatActivity {
         }, 1500);
     }
 
-    private void loadProfileAndStats() {
+    private void loadProfileAndStats(String branch) {
         // Real-time listener for name and profile image
         facultyRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -105,17 +107,51 @@ public class FacultyDashboardActivity extends AppCompatActivity {
                                 .placeholder(R.drawable.ic_profile_placeholder)
                                 .into(ivProfile);
                     }
-
-                    // Real-time stats
-                    Object managed = snapshot.child("students_managed").getValue();
-                    Object attendance = snapshot.child("avg_attendance").getValue();
-                    
-                    if (tvStudentsManaged != null) tvStudentsManaged.setText(managed != null ? managed.toString() : "0");
-                    if (tvAvgAttendance != null) tvAvgAttendance.setText(attendance != null ? attendance.toString() + "%" : "0%");
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+
+        // Real-time listener for students managed and average attendance from students node
+        FirebaseDatabase.getInstance().getReference("students").child(branch)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long totalStudents = 0;
+                        double totalAttendanceSum = 0;
+                        int studentsWithAttendance = 0;
+
+                        for (DataSnapshot batchSnap : snapshot.getChildren()) {
+                            totalStudents += batchSnap.getChildrenCount();
+                            for (DataSnapshot studentSnap : batchSnap.getChildren()) {
+                                Object attObj = studentSnap.child("attendance_percentage").getValue();
+                                if (attObj != null) {
+                                    try {
+                                        double attendance = Double.parseDouble(attObj.toString());
+                                        totalAttendanceSum += attendance;
+                                        studentsWithAttendance++;
+                                    } catch (Exception ignored) {}
+                                }
+                            }
+                        }
+
+                        if (tvStudentsManaged != null) {
+                            tvStudentsManaged.setText(String.valueOf(totalStudents));
+                        }
+
+                        if (tvAvgAttendance != null) {
+                            if (studentsWithAttendance > 0) {
+                                double avg = totalAttendanceSum / studentsWithAttendance;
+                                tvAvgAttendance.setText(String.format(Locale.US, "%.1f%%", avg));
+                            } else {
+                                tvAvgAttendance.setText("0%");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     private void startBusAnimation() {

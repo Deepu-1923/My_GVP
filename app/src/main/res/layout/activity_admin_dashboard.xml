@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:paddingTop="@dimen/app_top_margin">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -17,10 +18,21 @@
             android:layout_height="wrap_content"
             android:padding="24dp">
 
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/primary" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/btnBack"
+                android:layout_marginStart="16dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -210,10 +222,11 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/bg_icon_circle_blue"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="@color/bg_soft_blue"
                             android:padding="12dp"
-                            android:src="@android:drawable/ic_menu_myplaces"
-                            app:tint="@color/info" />
+                            android:src="@drawable/manage_students"
+                            app:tint="@color/icon_blue" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -245,10 +258,11 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/bg_icon_circle_purple"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="@color/bg_soft_purple"
                             android:padding="12dp"
-                            android:src="@android:drawable/ic_menu_edit"
-                            app:tint="@color/accent" />
+                            android:src="@drawable/manage_faculty"
+                            app:tint="@color/icon_purple" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -280,10 +294,11 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/bg_icon_circle_orange"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="@color/bg_soft_orange"
                             android:padding="12dp"
-                            android:src="@android:drawable/ic_dialog_info"
-                            app:tint="@color/warning" />
+                            android:src="@drawable/broadcast_notices"
+                            app:tint="@color/icon_orange" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -315,10 +330,11 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/bg_icon_circle_green"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="@color/bg_soft_green"
                             android:padding="12dp"
                             android:src="@android:drawable/ic_lock_power_off"
-                            app:tint="@color/success" />
+                            app:tint="@color/icon_green" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -350,27 +366,20 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/bg_icon_circle_blue"
+                            android:background="@drawable/bg_circle_icon"
+                            android:backgroundTint="@color/bg_soft_blue"
                             android:padding="12dp"
                             android:src="@drawable/ic_fee"
-                            app:tint="@color/info" />
+                            app:tint="@color/icon_blue" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Fees"
-                            android:textColor="@color/textPrimary"
+                            android:layout_marginTop="12dp"
+                            android:text="Manage\nFees"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
                             android:textStyle="bold" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnManageFees"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Manage"
-                            android:textAllCaps="false"
-                            android:textColor="@color/accent" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

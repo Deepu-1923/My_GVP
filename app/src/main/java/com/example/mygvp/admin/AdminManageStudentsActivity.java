@@ -5,7 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -39,7 +39,7 @@ import java.util.Map;
 
 public class AdminManageStudentsActivity extends AppCompatActivity {
 
-    private Spinner spinnerBranch, spinnerBatch, spinnerYear, spinnerSemester;
+    private AutoCompleteTextView spinnerBranch, spinnerBatch, spinnerYear, spinnerSemester;
     private MaterialButton btnViewDetails, btnUploadExcel;
     private RecyclerView rvStudents;
     private FloatingActionButton fabAddStudent;
@@ -91,28 +91,32 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
         fabAddStudent.setOnClickListener(v -> {
             Intent intent = new Intent(this, AdminEditStudentActivity.class);
             intent.putExtra("IS_EDIT", false);
-            intent.putExtra("BRANCH", spinnerBranch.getSelectedItem().toString());
-            intent.putExtra("BATCH", spinnerBatch.getSelectedItem().toString());
+            intent.putExtra("BRANCH", spinnerBranch.getText().toString());
+            intent.putExtra("BATCH", spinnerBatch.getText().toString());
             startActivity(intent);
         });
     }
 
     private void setupSpinners() {
-        // Casing adjusted to match Firebase screenshot: Civil, Mech, etc.
         String[] branches = {"CSE", "ECE", "Mech", "Civil", "CSM"};
-        String[] batches = {"2025-29"}; // First batch only as per request
+        String[] batches = {"2025-29"};
         String[] years = {"1", "2", "3", "4"};
         String[] semesters = {"1", "2"};
 
-        spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, branches));
-        spinnerBatch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, batches));
-        spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, years));
-        spinnerSemester.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, semesters));
+        spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, branches));
+        spinnerBatch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, batches));
+        spinnerYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, years));
+        spinnerSemester.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, semesters));
     }
 
     private void fetchStudents() {
-        String branch = spinnerBranch.getSelectedItem().toString();
-        String batch = spinnerBatch.getSelectedItem().toString();
+        String branch = spinnerBranch.getText().toString();
+        String batch = spinnerBatch.getText().toString();
+
+        if (branch.isEmpty() || batch.isEmpty()) {
+            Toast.makeText(this, "Please select Branch and Batch", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         dbRef.child(branch).child(batch).addValueEventListener(new ValueEventListener() {
             @Override
@@ -152,13 +156,18 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
             
-            String selectedBranch = spinnerBranch.getSelectedItem().toString();
-            String selectedBatch = spinnerBatch.getSelectedItem().toString();
+            String selectedBranch = spinnerBranch.getText().toString();
+            String selectedBatch = spinnerBatch.getText().toString();
+
+            if (selectedBranch.isEmpty() || selectedBatch.isEmpty()) {
+                Toast.makeText(this, "Please select Branch and Batch first", Toast.LENGTH_SHORT).show();
+                workbook.close();
+                return;
+            }
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Skip header
+                if (row.getRowNum() == 0) continue;
 
-                // Use DataFormatter to safely get any cell value as String (Fixes NUMERIC cell error)
                 String rollNo = formatter.formatCellValue(row.getCell(0)).trim();
                 String name = formatter.formatCellValue(row.getCell(1)).trim();
                 String email = formatter.formatCellValue(row.getCell(2)).trim();
@@ -168,11 +177,9 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
 
                 if (rollNo.isEmpty()) continue;
 
-                // Priority: Use Excel branch/batch if present, otherwise use Spinner selection
                 String finalBranch = (!branchFromExcel.isEmpty()) ? branchFromExcel : selectedBranch;
                 String finalBatch = (!batchFromExcel.isEmpty()) ? batchFromExcel : selectedBatch;
                 
-                // Format branch casing for Firebase consistency
                 finalBranch = formatBranchName(finalBranch);
 
                 if (password.isEmpty()) password = "gvp@123";
@@ -183,7 +190,6 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
                 updates.put("name", name);
                 updates.put("email", email);
                 updates.put("password", password);
-                // Not putting imageUrl here preserves existing photos
 
                 studentRef.updateChildren(updates);
             }
@@ -199,7 +205,7 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
         if (branch == null || branch.isEmpty()) return "Unknown";
         if (branch.equalsIgnoreCase("civil")) return "Civil";
         if (branch.equalsIgnoreCase("mech")) return "Mech";
-        return branch.toUpperCase(); // For CSE, ECE, CSM
+        return branch.toUpperCase();
     }
 
     private void deleteStudent(StudentModel student) {

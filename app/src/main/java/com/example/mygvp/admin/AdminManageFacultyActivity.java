@@ -3,7 +3,7 @@ package com.example.mygvp.admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,7 +26,7 @@ import java.util.List;
 
 public class AdminManageFacultyActivity extends AppCompatActivity {
 
-    private Spinner spinnerBranch;
+    private AutoCompleteTextView spinnerBranch;
     private MaterialButton btnViewDetails;
     private RecyclerView rvFaculty;
     private FloatingActionButton fabAddFaculty;
@@ -61,20 +61,30 @@ public class AdminManageFacultyActivity extends AppCompatActivity {
         btnViewDetails.setOnClickListener(v -> fetchFaculty());
 
         fabAddFaculty.setOnClickListener(v -> {
+            String branch = spinnerBranch.getText().toString();
+            if (branch.isEmpty()) {
+                Toast.makeText(this, "Please select a branch first", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(this, AdminEditFacultyActivity.class);
             intent.putExtra("IS_EDIT", false);
-            intent.putExtra("BRANCH", spinnerBranch.getSelectedItem().toString());
+            intent.putExtra("BRANCH", branch);
             startActivity(intent);
         });
     }
 
     private void setupSpinners() {
         String[] branches = {"CSE", "ECE", "MECH", "CIVIL", "CSM"};
-        spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, branches));
+        spinnerBranch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, branches));
     }
 
     private void fetchFaculty() {
-        String branch = spinnerBranch.getSelectedItem().toString();
+        String branch = spinnerBranch.getText().toString();
+
+        if (branch.isEmpty()) {
+            Toast.makeText(this, "Please select a branch", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         dbRef.child(branch).addValueEventListener(new ValueEventListener() {
             @Override

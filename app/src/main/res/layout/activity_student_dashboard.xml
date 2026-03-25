@@ -407,7 +407,7 @@
                                 android:layout_height="48dp"
                                 android:background="@drawable/bg_icon_circle_green"
                                 android:padding="12dp"
-                                android:src="@android:drawable/ic_menu_agenda"
+                                android:src="@drawable/ic_analytics"
                                 app:tint="@color/success" />
 
                             <TextView

@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,12 +18,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.mygvp.LostAndFoundActivity;
 import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
@@ -121,43 +127,58 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     renderImage(imageUrl);
                 } else {
-                    String cloudName = "dlw4oisub";
-                    String baseUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/w_300,h_300,c_fill,g_face,q_auto,f_auto/";
-                    
-                    String b = branch.trim().toUpperCase();
-                    String t = batch.trim();
-                    String r = rollNo.trim();
-
-                    // Multiple patterns to try based on Cloudinary structure
-                    String path1 = "students/" + b + "/" + t + "/" + r + ".jpg";
-                    String path2 = b + "/" + t + "/" + r + ".jpg";
-                    String path3 = r + ".jpg";
-
-                    Log.d("ProfileImage", "Trying Path 1: " + baseUrl + path1);
-                    Log.d("ProfileImage", "Trying Path 2: " + baseUrl + path2);
-                    Log.d("ProfileImage", "Trying Path 3: " + baseUrl + path3);
-                    
-                    Glide.with(StudentDashboardActivity.this)
-                            .load(baseUrl + path1)
-                            .apply(RequestOptions.circleCropTransform())
-                            .placeholder(R.drawable.ic_profile_placeholder)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .error(
-                                Glide.with(StudentDashboardActivity.this)
-                                        .load(baseUrl + path2)
-                                        .apply(RequestOptions.circleCropTransform())
-                                        .error(
-                                            Glide.with(StudentDashboardActivity.this)
-                                                    .load(baseUrl + path3)
-                                                    .apply(RequestOptions.circleCropTransform())
-                                                    .error(R.drawable.ic_profile_placeholder)
-                                        )
-                            )
-                            .into(imgProfile);
+                    tryFallbackUrls();
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) { renderImage(null); }
         });
+    }
+
+    private void tryFallbackUrls() {
+        String cloudName = "dlw4oisub";
+        String baseUrl = "https://res.cloudinary.com/" + cloudName + "/image/upload/w_300,h_300,c_fill,g_face,q_auto,f_auto/";
+        
+        String b = branch.trim().toUpperCase();
+        String t = batch.trim();
+        String r = rollNo.trim();
+
+        String[] paths = {
+            "students/" + b + "/" + t + "/" + r + ".jpg",
+            b + "/" + t + "/" + r + ".jpg",
+            r + ".jpg"
+        };
+
+        tryUrl(baseUrl, paths, 0);
+    }
+
+    private void tryUrl(String baseUrl, String[] paths, int index) {
+        if (index >= paths.length) {
+            imgProfile.setImageResource(R.drawable.ic_profile_placeholder);
+            return;
+        }
+
+        String fullUrl = baseUrl + paths[index];
+        Log.d("ProfileImage", "Attempting: " + fullUrl);
+
+        Glide.with(this)
+                .load(fullUrl)
+                .apply(RequestOptions.circleCropTransform())
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        tryUrl(baseUrl, paths, index + 1);
+                        return true; 
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        studentRef.child("profile_image_url").setValue(fullUrl);
+                        return false; 
+                    }
+                })
+                .into(imgProfile);
     }
 
     private void renderImage(String url) {

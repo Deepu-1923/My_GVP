@@ -4,57 +4,69 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.mygvp.R;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AdminManageFeesActivity extends AppCompatActivity {
 
     private AutoCompleteTextView spinnerBatch, spinnerStream, spinnerYear, spinnerSem;
-    private MaterialCardView cardUploadExcel;
+    private MaterialButton btnViewFees, btnUploadExcel;
     private TextView tvExcelFileName;
-    private MaterialButton btnSubmit;
+    private RecyclerView rvFeesList;
+    private StudentFeeAdapter adapter;
+    private List<StudentFee> feeList = new ArrayList<>();
+    
     private Uri excelUri;
     private static final int PICK_EXCEL_REQUEST = 1;
+    private DatabaseReference studentsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_manage_fees);
 
+        studentsRef = FirebaseDatabase.getInstance().getReference("students");
+
         initViews();
         setupSpinners();
+        setupRecyclerView();
 
         findViewById(R.id.toolbar).setOnClickListener(v -> finish());
 
-        cardUploadExcel.setOnClickListener(v -> {
+        btnUploadExcel.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "Select Excel File"), PICK_EXCEL_REQUEST);
         });
 
-        btnSubmit.setOnClickListener(v -> {
-            if (validateInputs()) {
-                uploadExcelDataToFirebase();
-            }
-        });
+        btnViewFees.setOnClickListener(v -> loadFeesData());
     }
 
     private void initViews() {
@@ -62,9 +74,10 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         spinnerStream = findViewById(R.id.spinnerStream);
         spinnerYear = findViewById(R.id.spinnerYear);
         spinnerSem = findViewById(R.id.spinnerSem);
-        cardUploadExcel = findViewById(R.id.cardUploadExcel);
+        btnViewFees = findViewById(R.id.btnViewFees);
+        btnUploadExcel = findViewById(R.id.btnUploadExcel);
         tvExcelFileName = findViewById(R.id.tvExcelFileName);
-        btnSubmit = findViewById(R.id.btnSubmit);
+        rvFeesList = findViewById(R.id.rvFeesList);
     }
 
     private void setupSpinners() {
@@ -79,19 +92,52 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         spinnerSem.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sems));
     }
 
-    private boolean validateInputs() {
-        if (spinnerBatch.getText().toString().isEmpty() ||
-            spinnerStream.getText().toString().isEmpty() ||
-            spinnerYear.getText().toString().isEmpty() ||
-            spinnerSem.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Please select all details", Toast.LENGTH_SHORT).show();
-            return false;
+    private void setupRecyclerView() {
+        adapter = new StudentFeeAdapter(feeList);
+        rvFeesList.setLayoutManager(new LinearLayoutManager(this));
+        rvFeesList.setAdapter(adapter);
+    }
+
+    private void loadFeesData() {
+        String batch = spinnerBatch.getText().toString();
+        String stream = spinnerStream.getText().toString();
+
+        if (batch.isEmpty() || stream.isEmpty()) {
+            Toast.makeText(this, "Please select Batch and Stream", Toast.LENGTH_SHORT).show();
+            return;
         }
-        if (excelUri == null) {
-            Toast.makeText(this, "Please upload an excel file", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+
+        studentsRef.child(stream).child(batch).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                feeList.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot studentSnap : snapshot.getChildren()) {
+                        String rollNo = studentSnap.getKey();
+                        String name = studentSnap.child("name").getValue(String.class);
+                        Double totalFee = studentSnap.child("totalFee").getValue(Double.class);
+                        Double paidAmount = studentSnap.child("paidAmount").getValue(Double.class);
+                        Double dueAmount = studentSnap.child("dueAmount").getValue(Double.class);
+
+                        if (totalFee == null) totalFee = 0.0;
+                        if (paidAmount == null) paidAmount = 0.0;
+                        if (dueAmount == null) dueAmount = totalFee - paidAmount;
+
+                        feeList.add(new StudentFee(rollNo, name, totalFee, paidAmount, dueAmount));
+                    }
+                    Collections.sort(feeList, (f1, f2) -> f1.getRollNumber().compareTo(f2.getRollNumber()));
+                    adapter.notifyDataSetChanged();
+                } else {
+                    adapter.notifyDataSetChanged();
+                    Toast.makeText(AdminManageFeesActivity.this, "No records found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(AdminManageFeesActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -99,19 +145,27 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_EXCEL_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             excelUri = data.getData();
-            tvExcelFileName.setText("File Selected: " + excelUri.getLastPathSegment());
+            tvExcelFileName.setVisibility(View.VISIBLE);
+            tvExcelFileName.setText("Selected: " + excelUri.getLastPathSegment());
+            uploadExcelDataToFirebase();
         }
     }
 
     private void uploadExcelDataToFirebase() {
+        String batch = spinnerBatch.getText().toString();
+        String stream = spinnerStream.getText().toString();
+
+        if (batch.isEmpty() || stream.isEmpty()) {
+            Toast.makeText(this, "Please select Batch and Stream first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Updating student fees...");
+        progressDialog.setMessage("Uploading and updating fees...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        String batch = spinnerBatch.getText().toString().trim();
-        String stream = spinnerStream.getText().toString().trim();
-        DatabaseReference studentsRef = FirebaseDatabase.getInstance().getReference("students").child(stream).child(batch);
+        DatabaseReference targetRef = studentsRef.child(stream).child(batch);
 
         try {
             InputStream inputStream = getContentResolver().openInputStream(excelUri);
@@ -130,7 +184,6 @@ public class AdminManageFeesActivity extends AppCompatActivity {
 
                 if (rollNo.isEmpty()) continue;
 
-                // Create update map to preserve existing data (like email/password)
                 Map<String, Object> studentUpdates = new HashMap<>();
                 studentUpdates.put("name", name);
                 studentUpdates.put("totalFee", totalFee);
@@ -138,23 +191,17 @@ public class AdminManageFeesActivity extends AppCompatActivity {
                 studentUpdates.put("dueAmount", dueAmount);
                 studentUpdates.put("rollNumber", rollNo);
                 
-                // Perform surgical update
-                studentsRef.child(rollNo).updateChildren(studentUpdates);
+                targetRef.child(rollNo).updateChildren(studentUpdates);
             }
 
             workbook.close();
             progressDialog.dismiss();
-            Toast.makeText(this, "Fees updated successfully. Login data preserved.", Toast.LENGTH_LONG).show();
-
-            Intent intent = new Intent(this, AdminViewFeesActivity.class);
-            intent.putExtra("PRE_BATCH", batch);
-            intent.putExtra("PRE_STREAM", stream);
-            startActivity(intent);
-            finish();
+            Toast.makeText(this, "Fees updated successfully!", Toast.LENGTH_SHORT).show();
+            loadFeesData();
 
         } catch (Exception e) {
             progressDialog.dismiss();
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Upload Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -163,7 +210,6 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         switch (cell.getCellType()) {
             case STRING: return cell.getStringCellValue();
             case NUMERIC: return String.valueOf((long) cell.getNumericCellValue());
-            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
             default: return "";
         }
     }
@@ -176,9 +222,7 @@ public class AdminManageFeesActivity extends AppCompatActivity {
             } else if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.STRING) {
                 return Double.parseDouble(cell.getStringCellValue());
             }
-        } catch (Exception e) {
-            return 0.0;
-        }
+        } catch (Exception e) {}
         return 0.0;
     }
 }

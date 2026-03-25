@@ -10,13 +10,15 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white">
+        android:background="@color/primary">
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarAdmissions"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Admissions"
-            app:titleTextColor="@color/univ_primary" />
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

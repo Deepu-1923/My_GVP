@@ -3,6 +3,7 @@ package com.example.mygvp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -88,9 +89,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (userType != null) {
             btnPortal.setText("View Dashboard");
-            // Using a more suitable, professional icon from the system
-            btnPortal.setIconResource(android.R.drawable.ic_menu_view);
-            btnPortal.setIconSize(48); // Making it smaller/standard
+            // Set the custom dashboard icon and ensure it is white
+            btnPortal.setIconResource(R.drawable.view_dashboard);
+            btnPortal.setIconTintResource(R.color.white);
+            btnPortal.setIconSize(55);
             btnPortal.setOnClickListener(v -> {
                 Intent intent;
                 if (userType.equals("FACULTY")) {
@@ -108,7 +110,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btnPortal.setText("Launch Portals");
             btnPortal.setIconResource(android.R.drawable.ic_lock_lock);
-            btnPortal.setIconSize(48);
+            btnPortal.setIconTintResource(R.color.white);
+            btnPortal.setIconSize(60);
             btnPortal.setOnClickListener(v -> showLoginBottomSheet());
         }
     }
@@ -116,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupDashboard() {
         // 1. Explore Campus
         View cardCampus = findViewById(R.id.miniCampus);
-        setupCard(cardCampus, "Explore\nCampus", android.R.drawable.ic_menu_gallery, R.color.bg_soft_purple);
+        setupCard(cardCampus, "Explore\nCampus", R.drawable.explore_campus, R.color.bg_soft_purple, R.color.icon_purple);
 
         List<Integer> campusImages = Arrays.asList(
                 R.drawable.main_gate,
@@ -142,23 +145,23 @@ public class MainActivity extends AppCompatActivity {
 
         // 2. Faculty Directory
         View cardFaculty = findViewById(R.id.miniFaculty);
-        setupCard(cardFaculty, "Faculty\nDirectory", android.R.drawable.ic_menu_my_calendar, R.color.bg_soft_blue);
+        setupCard(cardFaculty, "Faculty\nDirectory", R.drawable.faculty_directory, R.color.bg_soft_blue, R.color.icon_blue);
         cardFaculty.setOnClickListener(v -> showFacultyBranchDialog());
 
         // 3. Admissions (Updated from Administrative)
         View cardAdmissions = findViewById(R.id.miniAdmin);
-        setupCard(cardAdmissions, "Admissions", android.R.drawable.ic_menu_info_details, R.color.bg_soft_orange);
+        setupCard(cardAdmissions, "Admissions", R.drawable.id_card, R.color.bg_soft_orange, R.color.icon_orange);
         cardAdmissions.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, AdmissionsActivity.class));
         });
 
         // 4. Syllabus & Calendar
         View cardSyllabus = findViewById(R.id.miniSyllabus);
-        setupCard(cardSyllabus, "Academic\nResources", android.R.drawable.ic_menu_agenda, R.color.bg_soft_green);
+        setupCard(cardSyllabus, "Academic\nResources", R.drawable.academic_resources, R.color.bg_soft_green, R.color.icon_green);
         cardSyllabus.setOnClickListener(v -> showSyllabusBottomSheet());
     }
 
-    private void setupCard(View card, String title, int iconRes, int bgColorRes) {
+    private void setupCard(View card, String title, int iconRes, int bgColorRes, int iconColorRes) {
         TextView tv = card.findViewById(R.id.tvMiniTitle);
         ImageView iv = card.findViewById(R.id.ivMiniIcon);
         View iconBg = card.findViewById(R.id.flIconBg);
@@ -171,10 +174,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 iv.setVisibility(View.VISIBLE);
                 iv.setImageResource(iconRes);
+                iv.setImageTintList(ColorStateList.valueOf(getColor(iconColorRes)));
             }
         }
 
-        if (iconBg != null) iconBg.setBackgroundTintList(getColorStateList(bgColorRes));
+        if (iconBg != null) iconBg.setBackgroundTintList(ColorStateList.valueOf(getColor(bgColorRes)));
     }
 
     private void showFacultyBranchDialog() {

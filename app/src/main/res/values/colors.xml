@@ -32,6 +32,13 @@
     <color name="bg_soft_green">#E8F5E9</color>
     <color name="bg_soft_red">#FFEBEE</color>
 
+    <!-- Corresponding Icon Colors (Darker shades) -->
+    <color name="icon_purple">#8E24AA</color>
+    <color name="icon_blue">#1976D2</color>
+    <color name="icon_orange">#F57C00</color>
+    <color name="icon_green">#388E3C</color>
+    <color name="icon_red">#D32F2F</color>
+
     <!-- Text Colors -->
     <color name="textPrimary">#2C3E50</color>
     <color name="textSecondary">#7F8C8D</color>

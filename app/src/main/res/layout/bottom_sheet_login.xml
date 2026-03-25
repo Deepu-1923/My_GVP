@@ -51,10 +51,11 @@
             android:textSize="18sp"
             app:backgroundTint="@color/univ_primary"
             app:cornerRadius="20dp"
-            app:icon="@android:drawable/ic_lock_power_off"
+            app:icon="@drawable/ic_administrator"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
-            app:iconSize="24dp" />
+            app:iconSize="24dp"
+            app:iconTint="@color/white"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bsBtnFaculty"
@@ -69,7 +70,7 @@
             app:cornerRadius="20dp"
             app:strokeColor="@color/univ_primary"
             app:strokeWidth="2dp"
-            app:icon="@android:drawable/ic_menu_myplaces"
+            app:icon="@drawable/ic_faculty"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
             app:iconSize="24dp"
@@ -87,7 +88,7 @@
             app:cornerRadius="20dp"
             app:strokeColor="@color/univ_primary"
             app:strokeWidth="2dp"
-            app:icon="@android:drawable/ic_menu_edit"
+            app:icon="@drawable/ic_student"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
             app:iconSize="24dp"

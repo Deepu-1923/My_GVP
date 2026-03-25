@@ -1,16 +1,11 @@
 package com.example.mygvp.admin;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mygvp.AdminUploadActivity;
-import com.example.mygvp.MainActivity;
 import com.example.mygvp.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -32,10 +26,9 @@ import com.google.firebase.database.ValueEventListener;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
-    private MaterialCardView cardStudentManagement, cardFacultyManagement, cardSystemNotices;
-    private MaterialButton btnManageFees;
+    private MaterialCardView cardStudentManagement, cardFacultyManagement, cardSystemNotices, cardFees;
     private TextView tvTotalUsers;
-    private ImageButton btnMenu;
+    private ImageButton btnMenu, btnBack;
     private DatabaseReference studentsRef, facultyRef, adminRef;
 
     @Override
@@ -46,9 +39,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         cardStudentManagement = findViewById(R.id.cardStudentManagement);
         cardFacultyManagement = findViewById(R.id.cardFacultyManagement);
         cardSystemNotices = findViewById(R.id.cardSystemNotices);
-        btnManageFees = findViewById(R.id.btnManageFees);
+        cardFees = findViewById(R.id.cardFees);
         tvTotalUsers = findViewById(R.id.tvTotalUsers);
         btnMenu = findViewById(R.id.btnMenu);
+        btnBack = findViewById(R.id.btnBack);
 
         studentsRef = FirebaseDatabase.getInstance().getReference("students");
         facultyRef = FirebaseDatabase.getInstance().getReference("faculty");
@@ -56,7 +50,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         setupRealTimeStats();
 
-        btnMenu.setOnClickListener(v -> showCustomAdminMenu());
+        btnBack.setOnClickListener(v -> finish());
+        btnMenu.setOnClickListener(v -> showCustomAdminMenu(v));
 
         cardStudentManagement.setOnClickListener(v -> {
             startActivity(new Intent(AdminDashboardActivity.this, AdminManageStudentsActivity.class));
@@ -70,51 +65,27 @@ public class AdminDashboardActivity extends AppCompatActivity {
             startActivity(new Intent(AdminDashboardActivity.this, AdminUploadActivity.class));
         });
 
-        if (btnManageFees != null) {
-            btnManageFees.setOnClickListener(this::showFeesMenu);
-        }
+        cardFees.setOnClickListener(v -> {
+            startActivity(new Intent(AdminDashboardActivity.this, AdminManageFeesActivity.class));
+        });
     }
 
-    private void showFeesMenu(View v) {
-        PopupMenu popup = new PopupMenu(this, v);
-        popup.getMenu().add("View Fees Details");
-        popup.getMenu().add("Manage Fees Details");
+    private void showCustomAdminMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.getMenu().add(0, 1, 0, "Change Password");
+        popupMenu.getMenu().add(0, 2, 1, "Logout");
 
-        popup.setOnMenuItemClickListener(item -> {
-            String title = item.getTitle().toString();
-            if (title.equals("View Fees Details")) {
-                startActivity(new Intent(this, AdminViewFeesActivity.class));
-            } else if (title.equals("Manage Fees Details")) {
-                startActivity(new Intent(this, AdminManageFeesActivity.class));
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                showChangePasswordDialog();
+                return true;
+            } else if (item.getItemId() == 2) {
+                logoutAdmin();
+                return true;
             }
-            return true;
+            return false;
         });
-        popup.show();
-    }
-
-    private void showCustomAdminMenu() {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_admin_menu);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        LinearLayout btnChangePass = dialog.findViewById(R.id.menuChangePassword);
-        LinearLayout btnLogout = dialog.findViewById(R.id.menuLogout);
-
-        btnChangePass.setOnClickListener(v -> {
-            dialog.dismiss();
-            showChangePasswordDialog();
-        });
-
-        btnLogout.setOnClickListener(v -> {
-            dialog.dismiss();
-            logoutAdmin();
-        });
-
-        dialog.show();
+        popupMenu.show();
     }
 
     private void setupRealTimeStats() {
@@ -212,7 +183,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private void logoutAdmin() {
         SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
         prefs.edit().clear().apply();
-        Intent intent = new Intent(AdminDashboardActivity.this, MainActivity.class);
+        Intent intent = new Intent(AdminDashboardActivity.this, com.example.mygvp.MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
