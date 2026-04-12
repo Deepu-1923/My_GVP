@@ -4,11 +4,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <queries>
         <intent>
@@ -40,6 +42,9 @@
         <activity android:name=".AdmissionsActivity" />
         <activity android:name=".UploadAchievementActivity" />
         <activity android:name=".AdminUploadActivity" />
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity android:name=".admin.AdminLoginActivity" />
         <activity android:name=".admin.AdminDashboardActivity" />
@@ -62,6 +67,7 @@
         <activity android:name=".student.StudentAnalyticsActivity" />
         <activity android:name=".student.StudentResultsActivity" />
         <activity android:name=".student.StudentAttendanceActivity" />
+        <activity android:name=".student.StudentFeeActivity" />
         <activity android:name=".student.ForgotPasswordActivity" />
 
     </application>

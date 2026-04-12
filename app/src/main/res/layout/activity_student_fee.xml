@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back_custom"
-            app:title="Academic Results"
+            app:title="Fee Payments"
             app:titleTextColor="@color/textPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -97,10 +97,10 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnViewResult"
+                        android:id="@+id/btnViewReceipt"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Fetch Results"
+                        android:text="Fetch Fee Receipt"
                         android:textAllCaps="false"
                         android:textSize="16sp"
                         app:backgroundTint="@color/primary"
@@ -109,9 +109,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Results View -->
+            <!-- Receipt View -->
             <LinearLayout
-                android:id="@+id/layoutResult"
+                android:id="@+id/layoutReceipt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -132,7 +132,6 @@
                         android:padding="20dp">
 
                         <TextView
-                            android:id="@+id/tvCollegeName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
@@ -152,60 +151,70 @@
                             android:textSize="13sp"
                             android:layout_marginBottom="20dp" />
 
-                        <!-- Table Header -->
-                        <LinearLayout
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginBottom="16dp"
+                            android:background="@color/divider" />
+
+                        <GridLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@color/background"
-                            android:orientation="horizontal"
-                            android:paddingVertical="10dp">
+                            android:columnCount="2"
+                            android:rowCount="4">
 
                             <TextView
-                                android:layout_width="0dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="2.5"
-                                android:text="SUBJECT"
+                                android:text="Payment Date:"
                                 android:textColor="@color/textSecondary"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                                android:textSize="13sp"
+                                android:paddingBottom="8dp"/>
+                            <TextView
+                                android:id="@+id/tvPaymentDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textColor="@color/textPrimary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:layout_gravity="end"/>
 
                             <TextView
-                                android:layout_width="0dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1.5"
-                                android:gravity="center"
-                                android:text="CREDITS"
+                                android:text="Transaction Type:"
                                 android:textColor="@color/textSecondary"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                                android:textSize="13sp"
+                                android:paddingBottom="8dp"/>
+                            <TextView
+                                android:id="@+id/tvTransactionType"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textColor="@color/textPrimary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:layout_gravity="end"/>
 
                             <TextView
-                                android:layout_width="0dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1.5"
-                                android:gravity="center"
-                                android:text="GRADES"
+                                android:text="Paid Amount:"
                                 android:textColor="@color/textSecondary"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
+                                android:textSize="13sp"
+                                android:paddingBottom="8dp"/>
                             <TextView
-                                android:layout_width="0dp"
+                                android:id="@+id/tvAmount"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1.5"
-                                android:gravity="center"
-                                android:text="POINTS"
-                                android:textColor="@color/textSecondary"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                                android:text="₹ 0.00"
+                                android:textColor="@color/success"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_gravity="end"/>
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rvSubjects"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:overScrollMode="never" />
+                        </GridLayout>
 
                         <View
                             android:layout_width="match_parent"
@@ -214,13 +223,36 @@
                             android:background="@color/divider" />
 
                         <TextView
-                            android:id="@+id/tvCgpa"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rupees in words:"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/tvAmountInWords"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="@color/textPrimary"
+                            android:textSize="13sp"
+                            android:textStyle="italic"
+                            android:layout_marginTop="4dp"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="12dp"
+                            android:background="@color/divider" />
+
+                        <TextView
+                            android:id="@+id/tvDueAmount"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="end"
-                            android:text="SGPA: 0.00     CGPA: 0.00"
-                            android:textColor="@color/univ_primary"
-                            android:textSize="16sp"
+                            android:text="Due Amount: ₹ 0.00"
+                            android:textColor="@color/error"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                     </LinearLayout>

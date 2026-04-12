@@ -19,6 +19,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class AdminEditFacultyActivity extends AppCompatActivity {
     private String branch;
     private Uri imageUri;
     private static final int PICK_IMAGE = 102;
-    private DatabaseReference dbRef;
+    private DatabaseReference dbRef, metadataRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class AdminEditFacultyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_edit_faculty);
 
         dbRef = FirebaseDatabase.getInstance().getReference("faculty");
+        metadataRef = FirebaseDatabase.getInstance().getReference("metadata");
 
         ivProfile = findViewById(R.id.ivFacultyProfile);
         etFacultyId = findViewById(R.id.etFacultyId);
@@ -146,6 +148,9 @@ public class AdminEditFacultyActivity extends AppCompatActivity {
         newFaculty.setBranch(branch);
 
         dbRef.child(branch).child(fid).setValue(newFaculty).addOnSuccessListener(aVoid -> {
+            if (!isEdit) {
+                metadataRef.child("faculty_count").setValue(ServerValue.increment(1));
+            }
             Toast.makeText(this, "Faculty saved successfully", Toast.LENGTH_SHORT).show();
             finish();
         });

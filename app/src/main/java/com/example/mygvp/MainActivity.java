@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler sliderHandler = new Handler(Looper.getMainLooper());
     private Runnable sliderRunnable;
     private MaterialButton btnPortal;
+    private ImageButton fabChatBot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +73,15 @@ public class MainActivity extends AppCompatActivity {
 
         rvContactInfo = findViewById(R.id.rvContactInfo);
         btnPortal = findViewById(R.id.btnLaunchPortals);
+        fabChatBot = findViewById(R.id.fabChatBot);
 
         setupDashboard();
         setupContactInfo();
         setupSocialMedia();
+
+        fabChatBot.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, ChatActivity.class));
+        });
     }
 
     @Override
@@ -89,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (userType != null) {
             btnPortal.setText("View Dashboard");
-            // Set the custom dashboard icon and ensure it is white
             btnPortal.setIconResource(R.drawable.view_dashboard);
             btnPortal.setIconTintResource(R.color.white);
             btnPortal.setIconSize(55);
@@ -148,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         setupCard(cardFaculty, "Faculty\nDirectory", R.drawable.faculty_directory, R.color.bg_soft_blue, R.color.icon_blue);
         cardFaculty.setOnClickListener(v -> showFacultyBranchDialog());
 
-        // 3. Admissions (Updated from Administrative)
+        // 3. Admissions
         View cardAdmissions = findViewById(R.id.miniAdmin);
         setupCard(cardAdmissions, "Admissions", R.drawable.id_card, R.color.bg_soft_orange, R.color.icon_orange);
         cardAdmissions.setOnClickListener(v -> {
@@ -352,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void openUrl(String url) {
         if (url == null || url.isEmpty()) return;
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("tel:")) {
             url = "https://" + url;
         }
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

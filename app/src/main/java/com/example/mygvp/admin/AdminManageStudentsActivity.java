@@ -1,5 +1,6 @@
 package com.example.mygvp.admin;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,7 +26,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -36,6 +40,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AdminManageStudentsActivity extends AppCompatActivity {
 
@@ -46,6 +52,7 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
     private DatabaseReference dbRef;
     private StudentAdapter adapter;
     private List<StudentModel> studentList;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private final ActivityResultLauncher<String> excelPickerLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -86,7 +93,13 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
         
         btnViewDetails.setOnClickListener(v -> fetchStudents());
 
-        btnUploadExcel.setOnClickListener(v -> excelPickerLauncher.launch("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        btnUploadExcel.setOnClickListener(v -> {
+            if (spinnerBranch.getText().toString().isEmpty() || spinnerBatch.getText().toString().isEmpty()) {
+                Toast.makeText(this, "Please select Branch and Batch first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            excelPickerLauncher.launch("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        });
 
         fabAddStudent.setOnClickListener(v -> {
             Intent intent = new Intent(this, AdminEditStudentActivity.class);
@@ -99,7 +112,7 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
 
     private void setupSpinners() {
         String[] branches = {"CSE", "ECE", "Mech", "Civil", "CSM"};
-        String[] batches = {"2025-29"};
+        String[] batches = {"2025-29", "2026-30", "2027-31", "2028-32"};
         String[] years = {"1", "2", "3", "4"};
         String[] semesters = {"1", "2"};
 
@@ -118,7 +131,7 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
             return;
         }
 
-        dbRef.child(branch).child(batch).addValueEventListener(new ValueEventListener() {
+        dbRef.child(branch).child(batch).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 studentList.clear();
@@ -141,7 +154,7 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
                 });
                 rvStudents.setAdapter(adapter);
                 if (studentList.isEmpty()) {
-                    Toast.makeText(AdminManageStudentsActivity.this, "No students found for " + branch + " " + batch, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AdminManageStudentsActivity.this, "No students found", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -151,53 +164,86 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
     }
 
     private void uploadExcelData(Uri uri) {
-        try (InputStream is = getContentResolver().openInputStream(uri)) {
-            Workbook workbook = new XSSFWorkbook(is);
-            Sheet sheet = workbook.getSheetAt(0);
-            DataFormatter formatter = new DataFormatter();
-            
-            String selectedBranch = spinnerBranch.getText().toString();
-            String selectedBatch = spinnerBatch.getText().toString();
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Processing Excel Data...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-            if (selectedBranch.isEmpty() || selectedBatch.isEmpty()) {
-                Toast.makeText(this, "Please select Branch and Batch first", Toast.LENGTH_SHORT).show();
+        String selectedBranch = spinnerBranch.getText().toString();
+        String selectedBatch = spinnerBatch.getText().toString();
+
+        executorService.execute(() -> {
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                Workbook workbook = new XSSFWorkbook(is);
+                FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+                Sheet sheet = workbook.getSheetAt(0);
+                DataFormatter formatter = new DataFormatter();
+                
+                Map<String, Object> allUpdates = new HashMap<>();
+
+                for (Row row : sheet) {
+                    if (row.getRowNum() == 0) continue;
+
+                    String rollNo = getCellValue(row.getCell(0), evaluator, formatter);
+                    String name = getCellValue(row.getCell(1), evaluator, formatter);
+                    String email = getCellValue(row.getCell(2), evaluator, formatter);
+                    String password = getCellValue(row.getCell(3), evaluator, formatter);
+                    String branchFromExcel = getCellValue(row.getCell(4), evaluator, formatter);
+                    String batchFromExcel = getCellValue(row.getCell(5), evaluator, formatter);
+
+                    if (rollNo.isEmpty()) continue;
+
+                    String finalBranch = (!branchFromExcel.isEmpty()) ? branchFromExcel : selectedBranch;
+                    String finalBatch = (!batchFromExcel.isEmpty()) ? batchFromExcel : selectedBatch;
+                    finalBranch = formatBranchName(finalBranch);
+
+                    if (password.isEmpty()) password = "gvp@123";
+
+                    Map<String, Object> student = new HashMap<>();
+                    student.put("name", name);
+                    student.put("email", email);
+                    student.put("password", password);
+                    
+                    String path = finalBranch + "/" + finalBatch + "/" + rollNo;
+                    allUpdates.put(path, student);
+                }
                 workbook.close();
-                return;
+
+                runOnUiThread(() -> {
+                    if (allUpdates.isEmpty()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(this, "No valid data found in Excel", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    progressDialog.setMessage("Uploading to Firebase...");
+                    dbRef.updateChildren(allUpdates).addOnCompleteListener(task -> {
+                        progressDialog.dismiss();
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Success! Uploaded " + allUpdates.size() + " students.", Toast.LENGTH_LONG).show();
+                            fetchStudents();
+                        } else {
+                            Toast.makeText(this, "Upload failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+                Log.e("ExcelError", "Error: " + e.getMessage());
             }
+        });
+    }
 
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
-
-                String rollNo = formatter.formatCellValue(row.getCell(0)).trim();
-                String name = formatter.formatCellValue(row.getCell(1)).trim();
-                String email = formatter.formatCellValue(row.getCell(2)).trim();
-                String password = formatter.formatCellValue(row.getCell(3)).trim();
-                String branchFromExcel = formatter.formatCellValue(row.getCell(4)).trim();
-                String batchFromExcel = formatter.formatCellValue(row.getCell(5)).trim();
-
-                if (rollNo.isEmpty()) continue;
-
-                String finalBranch = (!branchFromExcel.isEmpty()) ? branchFromExcel : selectedBranch;
-                String finalBatch = (!batchFromExcel.isEmpty()) ? batchFromExcel : selectedBatch;
-                
-                finalBranch = formatBranchName(finalBranch);
-
-                if (password.isEmpty()) password = "gvp@123";
-
-                DatabaseReference studentRef = dbRef.child(finalBranch).child(finalBatch).child(rollNo);
-                
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("name", name);
-                updates.put("email", email);
-                updates.put("password", password);
-
-                studentRef.updateChildren(updates);
-            }
-            Toast.makeText(this, "Excel data processed successfully", Toast.LENGTH_SHORT).show();
-            workbook.close();
-        } catch (Exception e) {
-            Log.e("ExcelError", "Error: " + e.getMessage());
-            Toast.makeText(this, "Failed to parse Excel: " + e.getMessage(), Toast.LENGTH_LONG).show();
+    private String getCellValue(Cell cell, FormulaEvaluator evaluator, DataFormatter formatter) {
+        if (cell == null) return "";
+        if (cell.getCellType() == CellType.FORMULA) {
+            return formatter.formatCellValue(cell, evaluator);
+        } else {
+            return formatter.formatCellValue(cell);
         }
     }
 
@@ -211,5 +257,11 @@ public class AdminManageStudentsActivity extends AppCompatActivity {
     private void deleteStudent(StudentModel student) {
         dbRef.child(student.getBranch()).child(student.getBatch()).child(student.getRollNo())
                 .removeValue().addOnSuccessListener(aVoid -> Toast.makeText(this, "Student deleted", Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

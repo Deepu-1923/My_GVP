@@ -21,18 +21,26 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AdminManageFeesActivity extends AppCompatActivity {
 
@@ -45,7 +53,8 @@ public class AdminManageFeesActivity extends AppCompatActivity {
     
     private Uri excelUri;
     private static final int PICK_EXCEL_REQUEST = 1;
-    private DatabaseReference studentsRef;
+    private DatabaseReference studentsRef, paymentsRef, metadataRef;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,8 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_manage_fees);
 
         studentsRef = FirebaseDatabase.getInstance().getReference("students");
+        paymentsRef = FirebaseDatabase.getInstance().getReference("payments");
+        metadataRef = FirebaseDatabase.getInstance().getReference("metadata");
 
         initViews();
         setupSpinners();
@@ -104,7 +115,7 @@ public class AdminManageFeesActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        String[] batches = {"2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-2029", "2026-2030"};
+        String[] batches = {"2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-29", "2026-2030"};
         String[] streams = {"CSE", "CSM", "ECE", "MECH", "CIVIL"};
         String[] years = {"1", "2", "3", "4"};
         String[] sems = {"1", "2"};
@@ -132,40 +143,26 @@ public class AdminManageFeesActivity extends AppCompatActivity {
             return;
         }
 
-        studentsRef.child(stream).child(batch).addListenerForSingleValueEvent(new ValueEventListener() {
+        // Fetch from the new root 'payments' node
+        paymentsRef.child(stream).child(batch).child(year).child(sem).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 feeList.clear();
                 if (snapshot.exists()) {
                     for (DataSnapshot studentSnap : snapshot.getChildren()) {
-                        Object yVal = studentSnap.child("year").getValue();
-                        Object sVal = studentSnap.child("semester").getValue();
-                        String sYear = (yVal != null) ? String.valueOf(yVal) : "";
-                        String sSem = (sVal != null) ? String.valueOf(sVal) : "";
+                        String rollNo = studentSnap.getKey();
+                        String name = studentSnap.child("name").getValue(String.class);
+                        double totalFee = getDoubleFromSnapshot(studentSnap.child("totalFee"));
+                        double paidAmount = getDoubleFromSnapshot(studentSnap.child("paidAmount"));
+                        double dueAmount = getDoubleFromSnapshot(studentSnap.child("dueAmount"));
 
-                        if (year.equals(sYear) && sem.equals(sSem)) {
-                            String rollNo = studentSnap.getKey();
-                            String name = studentSnap.child("name").getValue(String.class);
-                            Double totalFee = studentSnap.child("totalFee").getValue(Double.class);
-                            Double paidAmount = studentSnap.child("paidAmount").getValue(Double.class);
-                            Double dueAmount = studentSnap.child("dueAmount").getValue(Double.class);
-
-                            if (totalFee == null) totalFee = 0.0;
-                            if (paidAmount == null) paidAmount = 0.0;
-                            if (dueAmount == null) dueAmount = Math.max(0, totalFee - paidAmount);
-
-                            feeList.add(new StudentFee(rollNo, name, totalFee, paidAmount, dueAmount));
-                        }
+                        feeList.add(new StudentFee(rollNo, name, totalFee, paidAmount, dueAmount));
                     }
                     Collections.sort(feeList, (f1, f2) -> f1.getRollNumber().compareTo(f2.getRollNumber()));
                     adapter.notifyDataSetChanged();
-                    
-                    if (feeList.isEmpty()) {
-                        Toast.makeText(AdminManageFeesActivity.this, "No records found for Year " + year + " Sem " + sem, Toast.LENGTH_SHORT).show();
-                    }
                 } else {
                     adapter.notifyDataSetChanged();
-                    Toast.makeText(AdminManageFeesActivity.this, "No student data found for " + stream + " " + batch, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AdminManageFeesActivity.this, "No payment records found for " + stream + " " + batch + " Year " + year + " Sem " + sem, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -174,6 +171,17 @@ public class AdminManageFeesActivity extends AppCompatActivity {
                 Toast.makeText(AdminManageFeesActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private double getDoubleFromSnapshot(DataSnapshot snapshot) {
+        if (!snapshot.exists() || snapshot.getValue() == null) return 0.0;
+        try {
+            Object val = snapshot.getValue();
+            if (val instanceof Double) return (Double) val;
+            if (val instanceof Long) return ((Long) val).doubleValue();
+            if (val instanceof String) return Double.parseDouble(((String) val).replace(",", ""));
+        } catch (Exception e) {}
+        return 0.0;
     }
 
     @Override
@@ -189,7 +197,7 @@ public class AdminManageFeesActivity extends AppCompatActivity {
 
     private void uploadExcelDataToFirebase() {
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Uploading fee records...");
+        progressDialog.setMessage("Processing Excel file...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -198,71 +206,105 @@ public class AdminManageFeesActivity extends AppCompatActivity {
         final String selectedYear = spinnerYear.getText().toString().trim();
         final String selectedSem = spinnerSem.getText().toString().trim();
 
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(excelUri);
-            Workbook workbook = WorkbookFactory.create(inputStream);
-            Sheet sheet = workbook.getSheetAt(0);
+        executorService.execute(() -> {
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(excelUri);
+                Workbook workbook = WorkbookFactory.create(inputStream);
+                Sheet sheet = workbook.getSheetAt(0);
 
-            Map<String, Object> allUpdates = new HashMap<>();
-            int count = 0;
+                Row headerRow = sheet.getRow(0);
+                if (headerRow == null) throw new Exception("Excel header row is missing");
 
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                String rollNo = getCellValueAsString(row.getCell(0)).trim();
-                if (rollNo.isEmpty()) continue;
-
-                String name = getCellValueAsString(row.getCell(1)).trim();
-                double paidAmount = getCellValueAsDouble(row.getCell(4));
-                double dueAmount = getCellValueAsDouble(row.getCell(5));
-                double totalFee = paidAmount + dueAmount;
-
-                Map<String, Object> studentUpdates = new HashMap<>();
-                studentUpdates.put("name", name);
-                studentUpdates.put("paidAmount", paidAmount);
-                studentUpdates.put("dueAmount", dueAmount);
-                studentUpdates.put("totalFee", totalFee);
-                studentUpdates.put("rollNumber", rollNo);
-                studentUpdates.put("branch", selectedStream);
-                studentUpdates.put("batch", selectedBatch);
-                studentUpdates.put("year", selectedYear);
-                studentUpdates.put("semester", selectedSem);
-
-                // Path relative to 'students' node
-                String path = selectedStream + "/" + selectedBatch + "/" + rollNo;
-                allUpdates.put(path, studentUpdates);
-                count++;
-            }
-
-            workbook.close();
-
-            if (allUpdates.isEmpty()) {
-                progressDialog.dismiss();
-                Toast.makeText(this, "No valid records found in the Excel file", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            final int finalCount = count;
-            studentsRef.updateChildren(allUpdates).addOnCompleteListener(task -> {
-                progressDialog.dismiss();
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "Successfully uploaded " + finalCount + " records!", Toast.LENGTH_SHORT).show();
-                    excelUri = null; // Reset selection
-                    tvExcelFileName.setText("No file selected");
-                    loadFeesData(); // Auto-refresh view
-                } else {
-                    String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
-                    Toast.makeText(this, "Firebase Upload Failed: " + error, Toast.LENGTH_LONG).show();
-                    Log.e("UploadError", "Firebase failed", task.getException());
+                int rollIdx = -1, nameIdx = -1, paidIdx = -1, dueIdx = -1, totalIdx = -1, dateIdx = -1, typeIdx = -1;
+                for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                    String header = getCellValueAsString(headerRow.getCell(i)).toLowerCase().trim();
+                    if (header.contains("roll")) rollIdx = i;
+                    else if (header.contains("name")) nameIdx = i;
+                    else if (header.contains("fee paid") || (header.contains("paid") && !header.contains("due"))) paidIdx = i;
+                    else if (header.contains("fee due") || header.contains("due")) dueIdx = i;
+                    else if (header.equalsIgnoreCase("total")) totalIdx = i;
+                    else if (header.contains("date")) dateIdx = i;
+                    else if (header.contains("transaction") || header.contains("type")) typeIdx = i;
                 }
-            });
 
-        } catch (Exception e) {
-            progressDialog.dismiss();
-            Toast.makeText(this, "Error reading Excel: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e("UploadError", "Excel read failed", e);
-        }
+                if (rollIdx == -1) rollIdx = 0;
+                if (nameIdx == -1) nameIdx = 1;
+                if (totalIdx == -1) totalIdx = 4;
+                if (paidIdx == -1) paidIdx = 5;
+                if (dueIdx == -1) dueIdx = 6;
+                if (dateIdx == -1) dateIdx = 7;
+                if (typeIdx == -1) typeIdx = 8;
+
+                Map<String, Object> paymentUpdates = new HashMap<>();
+                int count = 0;
+
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (row == null) continue;
+
+                    String rollNo = getCellValueAsString(row.getCell(rollIdx)).trim();
+                    if (rollNo.isEmpty()) continue;
+
+                    String name = getCellValueAsString(row.getCell(nameIdx)).trim();
+                    double paidAmount = getCellValueAsDouble(row.getCell(paidIdx));
+                    double dueAmount = getCellValueAsDouble(row.getCell(dueIdx));
+                    double totalFee = getCellValueAsDouble(row.getCell(totalIdx));
+                    if (totalFee == 0) totalFee = paidAmount + dueAmount;
+                    
+                    String paymentDate = getCellValueAsDateString(row.getCell(dateIdx));
+                    String transactionType = getCellValueAsString(row.getCell(typeIdx)).trim();
+
+                    Map<String, Object> p = new HashMap<>();
+                    p.put("name", name);
+                    p.put("rollNumber", rollNo);
+                    p.put("totalFee", totalFee);
+                    p.put("paidAmount", paidAmount);
+                    p.put("dueAmount", dueAmount);
+                    p.put("paymentDate", paymentDate != null ? paymentDate : "");
+                    p.put("transactionType", transactionType);
+                    p.put("branch", selectedStream);
+                    p.put("batch", selectedBatch);
+                    p.put("year", selectedYear);
+                    p.put("semester", selectedSem);
+
+                    String path = selectedStream + "/" + selectedBatch + "/" + selectedYear + "/" + selectedSem + "/" + rollNo;
+                    paymentUpdates.put(path, p);
+                    count++;
+                }
+
+                workbook.close();
+
+                final int finalCount = count;
+                runOnUiThread(() -> {
+                    if (paymentUpdates.isEmpty()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(this, "No valid records found in the Excel file", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    progressDialog.setMessage("Uploading " + finalCount + " records to payments node...");
+                    paymentsRef.updateChildren(paymentUpdates).addOnCompleteListener(task -> {
+                        progressDialog.dismiss();
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Successfully uploaded " + finalCount + " payment records!", Toast.LENGTH_SHORT).show();
+                            excelUri = null;
+                            tvExcelFileName.setText("No file selected");
+                            loadFeesData();
+                        } else {
+                            String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                            Toast.makeText(this, "Upload Failed: " + error, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+                Log.e("UploadError", "Excel process failed", e);
+            }
+        });
     }
 
     private String getCellValueAsString(Cell cell) {
@@ -285,13 +327,32 @@ public class AdminManageFeesActivity extends AppCompatActivity {
     private double getCellValueAsDouble(Cell cell) {
         if (cell == null) return 0.0;
         try {
-            if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
+            if (cell.getCellType() == CellType.NUMERIC) {
                 return cell.getNumericCellValue();
-            } else if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.STRING) {
+            } else if (cell.getCellType() == CellType.STRING) {
                 String s = cell.getStringCellValue().replaceAll("[^0-9.]", "");
                 return s.isEmpty() ? 0.0 : Double.parseDouble(s);
             }
         } catch (Exception e) {}
         return 0.0;
+    }
+
+    private String getCellValueAsDateString(Cell cell) {
+        if (cell == null) return null;
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                Date date = DateUtil.getJavaDate(cell.getNumericCellValue());
+                return new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(date);
+            } else if (cell.getCellType() == CellType.STRING) {
+                return cell.getStringCellValue().trim();
+            }
+        } catch (Exception e) {}
+        return null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

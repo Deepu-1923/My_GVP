@@ -41,6 +41,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
+
 public class StudentDashboardActivity extends AppCompatActivity {
 
     private TextView tvName;
@@ -254,7 +256,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
-        if (cardFee != null) cardFee.setOnClickListener(v -> Toast.makeText(this, "Fee Payments", Toast.LENGTH_SHORT).show());
+        if (cardFee != null) cardFee.setOnClickListener(v -> {
+            startActivity(new Intent(this, StudentFeeActivity.class));
+        });
     }
 
     private void logoutUser() {

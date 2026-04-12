@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -79,6 +80,13 @@ public class UploadAchievementActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upload_achievement);
 
         // 1. Initialize Views
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(v -> finish());
+        }
+
         rvAchievements = findViewById(R.id.rv_achievements);
         layoutEmptyState = findViewById(R.id.layout_empty_state);
         tvEmptyMsg = findViewById(R.id.tv_empty_msg);

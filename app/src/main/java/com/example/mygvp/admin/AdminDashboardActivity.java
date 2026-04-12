@@ -29,7 +29,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private MaterialCardView cardStudentManagement, cardFacultyManagement, cardSystemNotices, cardFees;
     private TextView tvTotalUsers;
     private ImageButton btnMenu, btnBack;
-    private DatabaseReference studentsRef, facultyRef, adminRef;
+    private DatabaseReference adminRef, metadataRef, studentsRef, facultyRef;
+    private ValueEventListener metadataListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +45,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btnMenu);
         btnBack = findViewById(R.id.btnBack);
 
+        adminRef = FirebaseDatabase.getInstance().getReference("admin");
+        metadataRef = FirebaseDatabase.getInstance().getReference("metadata");
         studentsRef = FirebaseDatabase.getInstance().getReference("students");
         facultyRef = FirebaseDatabase.getInstance().getReference("faculty");
-        adminRef = FirebaseDatabase.getInstance().getReference("admin");
+
+        // Temporary: Initialize counts if they don't exist
+        initializeMetadataIfMissing();
 
         setupRealTimeStats();
 
@@ -70,6 +75,48 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
     }
 
+    private void initializeMetadataIfMissing() {
+        metadataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists() || !snapshot.hasChild("student_count")) {
+                    // One-time manual count to set up the new system
+                    countAndInitialize();
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void countAndInitialize() {
+        studentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot studentSnapshot) {
+                long sCount = 0;
+                for (DataSnapshot branch : studentSnapshot.getChildren()) {
+                    for (DataSnapshot batch : branch.getChildren()) {
+                        sCount += batch.getChildrenCount();
+                    }
+                }
+                final long finalSCount = sCount;
+                facultyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot facultySnapshot) {
+                        long fCount = 0;
+                        for (DataSnapshot branch : facultySnapshot.getChildren()) {
+                            fCount += branch.getChildrenCount();
+                        }
+                        metadataRef.child("student_count").setValue(finalSCount);
+                        metadataRef.child("faculty_count").setValue(fCount);
+                        Toast.makeText(AdminDashboardActivity.this, "Database Stats Initialized!", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                });
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     private void showCustomAdminMenu(View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         popupMenu.getMenu().add(0, 1, 0, "Change Password");
@@ -89,57 +136,39 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void setupRealTimeStats() {
-        ValueEventListener userCounterListener = new ValueEventListener() {
+        metadataListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                updateTotalUserCount();
+                long studentCount = 0;
+                long facultyCount = 0;
+                
+                if (snapshot.hasChild("student_count")) {
+                    studentCount = snapshot.child("student_count").getValue(Long.class);
+                }
+                if (snapshot.hasChild("faculty_count")) {
+                    facultyCount = snapshot.child("faculty_count").getValue(Long.class);
+                }
+                
+                long total = studentCount + facultyCount;
+                if (total >= 1000) {
+                    tvTotalUsers.setText(String.format("%.1fk", total / 1000.0));
+                } else {
+                    tvTotalUsers.setText(String.valueOf(total));
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         };
-
-        studentsRef.addValueEventListener(userCounterListener);
-        facultyRef.addValueEventListener(userCounterListener);
+        metadataRef.addValueEventListener(metadataListener);
     }
 
-    private void updateTotalUserCount() {
-        studentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot studentSnapshot) {
-                long studentCount = countUsersInNestedStructure(studentSnapshot);
-
-                facultyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot facultySnapshot) {
-                        long facultyCount = countUsersInNestedStructure(facultySnapshot);
-                        long total = studentCount + facultyCount;
-
-                        if (total >= 1000) {
-                            tvTotalUsers.setText(String.format("%.1fk", total / 1000.0));
-                        } else {
-                            tvTotalUsers.setText(String.valueOf(total));
-                        }
-                    }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
-            }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
-        });
-    }
-
-    private long countUsersInNestedStructure(DataSnapshot snapshot) {
-        long count = 0;
-        for (DataSnapshot level1 : snapshot.getChildren()) {
-            for (DataSnapshot level2 : level1.getChildren()) {
-                if (snapshot.getKey() != null && snapshot.getKey().equals("students")) {
-                    count += level2.getChildrenCount();
-                } else {
-                    count++;
-                }
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (metadataRef != null && metadataListener != null) {
+            metadataRef.removeEventListener(metadataListener);
         }
-        return count;
     }
 
     private void showChangePasswordDialog() {

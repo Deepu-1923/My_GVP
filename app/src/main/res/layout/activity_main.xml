@@ -294,4 +294,15 @@
         app:iconTint="@color/white"
         app:elevation="8dp" />
 
+    <ImageButton
+        android:id="@+id/fabChatBot"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:src="@drawable/chat_bot"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:contentDescription="ChatGVP" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

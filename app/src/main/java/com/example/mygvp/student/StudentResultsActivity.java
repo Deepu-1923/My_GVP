@@ -40,6 +40,7 @@ public class StudentResultsActivity extends AppCompatActivity {
 
     private String rollNo, branch, batch, year, sem, studentName;
     private List<SubjectModel> subjectList = new ArrayList<>();
+    private DatabaseReference resultsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,21 +65,63 @@ public class StudentResultsActivity extends AppCompatActivity {
 
         rvSubjects.setLayoutManager(new LinearLayoutManager(this));
 
-        // Setup Year Dropdown
-        String[] years = {"1", "2", "3", "4"};
-        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, years);
-        spinnerYear.setAdapter(yearAdapter);
+        resultsRef = FirebaseDatabase.getInstance()
+                .getReference("students")
+                .child(branch)
+                .child(batch)
+                .child(rollNo)
+                .child("results");
 
-        // Setup Semester Dropdown
-        String[] semesters = {"1", "2"};
-        ArrayAdapter<String> semAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, semesters);
-        spinnerSemester.setAdapter(semAdapter);
+        setupDynamicSpinners();
 
         btnViewResult.setOnClickListener(v -> loadResult());
         
         findViewById(R.id.toolbar).setOnClickListener(v -> finish());
+    }
+
+    private void setupDynamicSpinners() {
+        resultsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) return;
+
+                List<String> years = new ArrayList<>();
+                for (DataSnapshot yearSnap : snapshot.getChildren()) {
+                    years.add(yearSnap.getKey());
+                }
+                
+                ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(StudentResultsActivity.this,
+                        android.R.layout.simple_list_item_1, years);
+                spinnerYear.setAdapter(yearAdapter);
+
+                spinnerYear.setOnItemClickListener((parent, view, position, id) -> {
+                    String selectedYear = (String) parent.getItemAtPosition(position);
+                    fetchSemesters(selectedYear);
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void fetchSemesters(String selectedYear) {
+        resultsRef.child(selectedYear).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> semesters = new ArrayList<>();
+                for (DataSnapshot semSnap : snapshot.getChildren()) {
+                    semesters.add(semSnap.getKey());
+                }
+                ArrayAdapter<String> semAdapter = new ArrayAdapter<>(StudentResultsActivity.this,
+                        android.R.layout.simple_list_item_1, semesters);
+                spinnerSemester.setAdapter(semAdapter);
+                spinnerSemester.setText("", false);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void loadResult() {
@@ -90,17 +133,7 @@ public class StudentResultsActivity extends AppCompatActivity {
             return;
         }
 
-        // Structure: students > branch > batch > rollNo > results > year > sem
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-                .getReference("students")
-                .child(branch)
-                .child(batch)
-                .child(rollNo)
-                .child("results")
-                .child(year)
-                .child(sem);
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        resultsRef.child(year).child(sem).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
@@ -118,7 +151,6 @@ public class StudentResultsActivity extends AppCompatActivity {
                     String name = key;
                     String credits = s.child("credits").getValue() != null ? String.valueOf(s.child("credits").getValue()) : "0";
                     
-                    // Trying to get "grade" or "grades" or "result"
                     String grade = "N/A";
                     if (s.child("grade").exists()) {
                         grade = String.valueOf(s.child("grade").getValue());
@@ -131,12 +163,11 @@ public class StudentResultsActivity extends AppCompatActivity {
                     subjectList.add(new SubjectModel(name, credits, grade, points));
                 }
 
-                // SORTING LOGIC: Subjects with more credits (3.0) first, Labs (1.5) last
                 Collections.sort(subjectList, (s1, s2) -> {
                     try {
                         double c1 = Double.parseDouble(s1.credits);
                         double c2 = Double.parseDouble(s2.credits);
-                        return Double.compare(c2, c1); // Descending order
+                        return Double.compare(c2, c1);
                     } catch (Exception e) {
                         return 0;
                     }
@@ -144,9 +175,7 @@ public class StudentResultsActivity extends AppCompatActivity {
 
                 rvSubjects.setAdapter(new SubjectAdapter(subjectList));
 
-                // Formatted Info with Bold Keys
                 SpannableStringBuilder builder = new SpannableStringBuilder();
-                
                 appendBold(builder, "Name: ", studentName + "\n");
                 appendBold(builder, "Roll Number: ", rollNo + "\n");
                 appendBold(builder, "Semester: ", year + "-" + sem + "\n");

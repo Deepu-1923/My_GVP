@@ -10,14 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:paddingTop="28dp"
         app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:navigationIcon="@drawable/ic_back_white"
             app:title="Achievements"
-            app:titleTextColor="@color/textPrimary" />
+            app:titleTextColor="@color/white" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layout_search"
