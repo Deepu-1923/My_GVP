@@ -6,20 +6,26 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="28dp"
+        android:background="@android:color/transparent" />
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:paddingTop="28dp"
+        android:layout_marginTop="28dp"
+        android:background="@color/univ_primary"
         app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_back_custom"
+            app:navigationIcon="@drawable/ic_back_white"
+            app:navigationIconTint="@color/white"
             app:title="Fee Payments"
-            app:titleTextColor="@color/textPrimary" />
+            app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView

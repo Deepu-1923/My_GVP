@@ -34,7 +34,7 @@ public class StudentAttendanceActivity extends AppCompatActivity {
     private MonthlyAttendanceAdapter adapter;
     private List<MonthlyAttendance> attendanceList;
     private String rollNo, branch, batch;
-    private DatabaseReference attendanceRef;
+    private DatabaseReference baseAttendanceRef;
     private ValueEventListener attendanceListener;
 
     @Override
@@ -68,25 +68,60 @@ public class StudentAttendanceActivity extends AppCompatActivity {
         rvMonthlyAttendance.setLayoutManager(new LinearLayoutManager(this));
         rvMonthlyAttendance.setAdapter(adapter);
 
-        setupDropdowns();
+        baseAttendanceRef = FirebaseDatabase.getInstance().getReference("attendance")
+                .child(branch.trim())
+                .child(batch.trim());
 
-        fetchAttendanceData("1", "1");
+        setupDynamicDropdowns();
     }
 
-    private void setupDropdowns() {
-        String[] years = {"1", "2", "3", "4"};
-        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, years);
-        spinnerYear.setAdapter(yearAdapter);
-        spinnerYear.setText("1", false);
+    private void setupDynamicDropdowns() {
+        if (rollNo == null || branch == null || batch == null) {
+            Toast.makeText(this, "Missing student information", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String[] sems = {"1", "2"};
-        ArrayAdapter<String> semAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sems);
-        spinnerSemester.setAdapter(semAdapter);
-        spinnerSemester.setText("1", false);
+        baseAttendanceRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) return;
+
+                List<String> years = new ArrayList<>();
+                for (DataSnapshot yearSnap : snapshot.getChildren()) {
+                    // Check if this student has any records in this year
+                    boolean found = false;
+                    for (DataSnapshot semSnap : yearSnap.getChildren()) {
+                        if (semSnap.hasChild(rollNo)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        years.add(yearSnap.getKey());
+                    }
+                }
+
+                if (!years.isEmpty()) {
+                    ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(StudentAttendanceActivity.this,
+                            android.R.layout.simple_list_item_1, years);
+                    spinnerYear.setAdapter(yearAdapter);
+                    
+                    // If current text is empty or not in new list, pick first
+                    String currentYear = spinnerYear.getText().toString();
+                    if (currentYear.isEmpty() || !years.contains(currentYear)) {
+                        spinnerYear.setText(years.get(0), false);
+                        fetchSemesters(years.get(0));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
 
         spinnerYear.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = parent.getItemAtPosition(position).toString();
-            fetchAttendanceData(selectedYear, spinnerSemester.getText().toString());
+            fetchSemesters(selectedYear);
         });
 
         spinnerSemester.setOnItemClickListener((parent, view, position, id) -> {
@@ -95,22 +130,46 @@ public class StudentAttendanceActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchSemesters(String selectedYear) {
+        baseAttendanceRef.child(selectedYear).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> semesters = new ArrayList<>();
+                for (DataSnapshot semSnap : snapshot.getChildren()) {
+                    if (semSnap.hasChild(rollNo)) {
+                        semesters.add(semSnap.getKey());
+                    }
+                }
+                
+                if (!semesters.isEmpty()) {
+                    ArrayAdapter<String> semAdapter = new ArrayAdapter<>(StudentAttendanceActivity.this,
+                            android.R.layout.simple_list_item_1, semesters);
+                    spinnerSemester.setAdapter(semAdapter);
+                    
+                    String currentSem = spinnerSemester.getText().toString();
+                    if (currentSem.isEmpty() || !semesters.contains(currentSem)) {
+                        spinnerSemester.setText(semesters.get(0), false);
+                        fetchAttendanceData(selectedYear, semesters.get(0));
+                    } else {
+                        fetchAttendanceData(selectedYear, currentSem);
+                    }
+                } else {
+                    spinnerSemester.setText("", false);
+                    resetUI();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     private void fetchAttendanceData(String year, String sem) {
-        if (rollNo == null || branch == null || batch == null) {
-            Toast.makeText(this, "Missing student information", Toast.LENGTH_SHORT).show();
+        if (rollNo == null || branch == null || batch == null || year.isEmpty() || sem.isEmpty()) {
             return;
         }
 
-        if (attendanceRef != null && attendanceListener != null) {
-            attendanceRef.removeEventListener(attendanceListener);
-        }
-
-        attendanceRef = FirebaseDatabase.getInstance().getReference("attendance")
-                .child(branch.trim())
-                .child(batch.trim())
-                .child(year.trim())
-                .child(sem.trim())
-                .child(rollNo.trim());
+        DatabaseReference ref = baseAttendanceRef.child(year).child(sem).child(rollNo);
 
         attendanceListener = new ValueEventListener() {
             @Override
@@ -147,7 +206,7 @@ public class StudentAttendanceActivity extends AppCompatActivity {
             }
         };
 
-        attendanceRef.addValueEventListener(attendanceListener);
+        ref.addValueEventListener(attendanceListener);
     }
 
     private double getDoubleValue(DataSnapshot snapshot) {

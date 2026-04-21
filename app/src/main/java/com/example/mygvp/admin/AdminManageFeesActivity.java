@@ -115,7 +115,7 @@ public class AdminManageFeesActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        String[] batches = {"2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-29", "2026-2030"};
+        String[] batches = {"2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-2029", "2026-2030"};
         String[] streams = {"CSE", "CSM", "ECE", "MECH", "CIVIL"};
         String[] years = {"1", "2", "3", "4"};
         String[] sems = {"1", "2"};

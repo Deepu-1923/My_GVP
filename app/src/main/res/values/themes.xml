@@ -44,4 +44,13 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="Widget.MyGVP.ExposedDropdownMenu" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="endIconDrawable">@drawable/ic_down_arrow</item>
+        <item name="endIconTint">@color/univ_primary</item>
+        <item name="endIconScaleType">centerInside</item>
+        <item name="boxStrokeColor">@color/univ_primary</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+
 </resources>

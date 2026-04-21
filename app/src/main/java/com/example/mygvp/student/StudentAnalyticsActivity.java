@@ -69,8 +69,47 @@ public class StudentAnalyticsActivity extends AppCompatActivity {
         
         achievementsRef = FirebaseDatabase.getInstance().getReference("achievements");
 
-        showSampleData();
+        loadAttendanceSummary();
         loadAnalyticsData();
+    }
+
+    private void loadAttendanceSummary() {
+        DatabaseReference attendanceBaseRef = FirebaseDatabase.getInstance().getReference("attendance")
+                .child(branch).child(batch);
+
+        attendanceBaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long totalPresent = 0;
+                long totalConducted = 0;
+                boolean found = false;
+
+                for (DataSnapshot yearSnap : snapshot.getChildren()) {
+                    for (DataSnapshot semSnap : yearSnap.getChildren()) {
+                        DataSnapshot studentSnap = semSnap.child(rollNo);
+                        if (studentSnap.exists()) {
+                            totalPresent += getLongValue(studentSnap.child("present_days"));
+                            totalConducted += getLongValue(studentSnap.child("total_days"));
+                            found = true;
+                        }
+                    }
+                }
+
+                if (found && totalConducted > 0) {
+                    float percentage = (totalPresent * 100f) / totalConducted;
+                    setupAttendanceChart(Math.round(percentage * 10f) / 10f, 100f - (Math.round(percentage * 10f) / 10f));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private long getLongValue(DataSnapshot snapshot) {
+        Object val = snapshot.getValue();
+        if (val instanceof Number) return ((Number) val).longValue();
+        try { return Long.parseLong(String.valueOf(val)); } catch (Exception e) { return 0; }
     }
 
     private void showSampleData() {
@@ -85,20 +124,6 @@ public class StudentAnalyticsActivity extends AppCompatActivity {
     }
 
     private void loadAnalyticsData() {
-        // Attendance logic
-        studentRef.child("attendance_percentage").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    try {
-                        float present = Float.parseFloat(String.valueOf(snapshot.getValue()));
-                        setupAttendanceChart(present, 100f - present);
-                    } catch (Exception ignored) {}
-                }
-            }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
-        });
-
         // Results logic (Side-by-side Bars)
         studentRef.child("results").addValueEventListener(new ValueEventListener() {
             @Override

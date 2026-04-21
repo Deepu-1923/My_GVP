@@ -9,17 +9,18 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:paddingTop="28dp"
+        android:layout_marginTop="28dp"
+        android:background="@color/univ_primary"
         app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_back_custom"
+            app:navigationIcon="@drawable/ic_back_white"
+            app:navigationIconTint="@color/white"
             app:title="Academic Results"
-            app:titleTextColor="@color/textPrimary" />
+            app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -61,9 +62,9 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.MyGVP.ExposedDropdownMenu"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="58dp"
                         android:layout_marginBottom="16dp"
                         android:hint="Academic Year"
                         app:boxCornerRadiusBottomEnd="16dp"
@@ -74,14 +75,16 @@
                         <AutoCompleteTextView
                             android:id="@+id/spinnerYear"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:layout_height="match_parent"
+                            android:inputType="none"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="48dp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.MyGVP.ExposedDropdownMenu"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="58dp"
                         android:layout_marginBottom="24dp"
                         android:hint="Semester"
                         app:boxCornerRadiusBottomEnd="16dp"
@@ -92,8 +95,10 @@
                         <AutoCompleteTextView
                             android:id="@+id/spinnerSemester"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:layout_height="match_parent"
+                            android:inputType="none"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="48dp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.button.MaterialButton
