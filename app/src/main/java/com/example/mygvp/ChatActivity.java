@@ -49,16 +49,13 @@ public class ChatActivity extends AppCompatActivity {
     // Gemini AI Members
     private ChatFutures chatSession;
 
-    // ⚠️ KEEP THIS AS A PLACEHOLDER HERE. Paste your real key in Android Studio only!
-    private static final String GEMINI_API_KEY = "AIzaSyBiofhrxqc2nrfaBUW81NNXF-yWzRmtkrs";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        SharedPreferences prefs = getSharedPreferences("MyGVP_UserPrefs", MODE_PRIVATE);
-        userName = prefs.getString("LOGGED_IN_NAME", "friend");
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.prefs_user_name), MODE_PRIVATE);
+        userName = prefs.getString(getString(R.string.key_logged_in_name), "friend");
 
         // 1. Load saved chat history FIRST
         loadChatHistory();
@@ -75,11 +72,11 @@ public class ChatActivity extends AppCompatActivity {
     // --- NEW: SAVE AND LOAD METHODS ---
 
     private void loadChatHistory() {
-        SharedPreferences prefs = getSharedPreferences("MyGVP_ChatPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.prefs_chat_history), MODE_PRIVATE);
         Gson gson = new Gson();
 
         // Create a unique key using the logged-in user's name
-        String uniqueChatKey = "chat_history_" + userName;
+        String uniqueChatKey = getString(R.string.key_chat_history_prefix) + userName;
 
         // Load only the data for THIS specific user
         String json = prefs.getString(uniqueChatKey, null);
@@ -102,13 +99,13 @@ public class ChatActivity extends AppCompatActivity {
             // This safely removes the oldest messages from the top of the list
             chatMessages.subList(0, chatMessages.size() - 100).clear();
         }
-        SharedPreferences prefs = getSharedPreferences("MyGVP_ChatPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.prefs_chat_history), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         Gson gson = new Gson();
         String json = gson.toJson(chatMessages);
 
         // Create a unique key using the logged-in user's name
-        String uniqueChatKey = "chat_history_" + userName;
+        String uniqueChatKey = getString(R.string.key_chat_history_prefix) + userName;
 
         // Save the data strictly to this user's unique key
         editor.putString(uniqueChatKey, json);
@@ -166,7 +163,7 @@ public class ChatActivity extends AppCompatActivity {
             configBuilder.temperature = 0.4f;
             GenerationConfig generationConfig = configBuilder.build();
 
-            RequestOptions requestOptions = new RequestOptions(60000L, "v1beta");
+            RequestOptions requestOptions = new RequestOptions(60000L, getString(R.string.gemini_api_version));
 
             StringBuilder systemContext = new StringBuilder();
             systemContext.append("Identity: You are the MyGVP AI Assistant for Gayatri Vidya Parishad College. User is ").append(userName).append(".\n\n");
@@ -182,8 +179,8 @@ public class ChatActivity extends AppCompatActivity {
             systemContext.append("Tone: Helpful, polite, and strictly focused on academic/app navigation guidance.");
 
             GenerativeModel gm = new GenerativeModel(
-                    "gemini-2.5-flash",
-                    "AIzaSyBiofhrxqc2nrfaBUW81NNXF-yWzRmtkrs", // Make sure this uses the variable
+                    getString(R.string.gemini_model),
+                    getString(R.string.gemini_api_key),
                     generationConfig,
                     null,
                     requestOptions,

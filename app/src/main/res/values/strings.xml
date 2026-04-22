@@ -55,4 +55,12 @@
         <item>Semester 1</item>
         <item>Semester 2</item>
     </string-array>
+
+    <string name="gemini_model" translatable="false">gemini-1.5-flash</string>
+    <string name="prefs_user_name" translatable="false">MyGVP_UserPrefs</string>
+    <string name="key_logged_in_name" translatable="false">LOGGED_IN_NAME</string>
+    <string name="prefs_chat_history" translatable="false">MyGVP_ChatPrefs</string>
+    <string name="key_chat_history_prefix" translatable="false">chat_history_</string>
+    <string name="gemini_api_version" translatable="false">v1beta</string>
+    <string name="default_user_name">friend</string>
 </resources>
