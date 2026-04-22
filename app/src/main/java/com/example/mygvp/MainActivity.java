@@ -320,15 +320,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadSyllabus(String branch, String year, String sem) {
-        String dbPath = "Syllabus/" + branch + "/" + year + "/" + sem;
+        // Updated path to match AdminUploadActivity: syllabus -> Year -> Semester -> Branch
+        String dbPath = "syllabus/" + year + "/" + sem + "/" + branch;
         dbRef.child(dbPath).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String url = snapshot.getValue(String.class);
+                    android.util.Log.d("SyllabusDownload", "URL: " + url);
                     openUrl(url);
                 } else {
-                    Toast.makeText(MainActivity.this, "Syllabus not found for " + branch, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Syllabus not found for " + branch + " (" + year + ", " + sem + ")", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -339,12 +341,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadCalendar() {
-        dbRef.child("AcademicCalendar").addListenerForSingleValueEvent(new ValueEventListener() {
+        // Admin uploads to 'academic_calendar/{year}'. We'll fetch the most recent one.
+        dbRef.child("academic_calendar").orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String url = snapshot.getValue(String.class);
-                    openUrl(url);
+                    // Get the latest year child
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        String url = child.getValue(String.class);
+                        openUrl(url);
+                    }
                 } else {
                     Toast.makeText(MainActivity.this, "Calendar not found", Toast.LENGTH_SHORT).show();
                 }
@@ -361,6 +367,20 @@ public class MainActivity extends AppCompatActivity {
         if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("tel:")) {
             url = "https://" + url;
         }
+
+        // Use Google Docs Viewer for PDFs (works for both 'image' and 'raw' Cloudinary types)
+        // This prevents the "just downloading" issue and allows in-browser viewing
+        if (url.toLowerCase().contains(".pdf") || url.contains("/raw/upload/")) {
+            String viewerUrl = "https://docs.google.com/viewer?url=" + Uri.encode(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(viewerUrl));
+            try {
+                startActivity(intent);
+                return;
+            } catch (Exception e) {
+                android.util.Log.e("SyllabusDownload", "Google Docs viewer failed, falling back to direct link", e);
+            }
+        }
+
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(intent);
     }

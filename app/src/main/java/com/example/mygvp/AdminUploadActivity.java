@@ -96,6 +96,7 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnSelect.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("application/pdf");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent, PICK_FILE);
         });
 
@@ -162,18 +163,23 @@ public class AdminUploadActivity extends AppCompatActivity {
         btnUpload.setEnabled(false);
         btnUpload.setText("Uploading...");
 
-        // Using your new preset: sylbs_caldr
+        // Smart resource type: use 'raw' for larger files (8MB-10MB) to avoid "Invalid PDF" error,
+        // use 'auto' for others to keep them as viewable images in Cloudinary.
+        String resourceType = (size > 7 * 1024 * 1024) ? "raw" : "auto";
+
         MediaManager.get().upload(selectedFileUri)
                 .unsigned("sylbs_caldr")
-                .option("resource_type", "auto") 
+                .option("resource_type", resourceType)
                 .callback(new UploadCallback() {
                     @Override public void onSuccess(String requestId, Map resultData) {
-                        saveToFirebase((String) resultData.get("secure_url"));
+                        String secureUrl = (String) resultData.get("secure_url");
+                        Log.d("CloudinarySuccess", "Uploaded as " + resourceType + ". URL: " + secureUrl);
+                        saveToFirebase(secureUrl);
                     }
                     @Override public void onError(String requestId, ErrorInfo error) {
                         btnUpload.setEnabled(true);
                         btnUpload.setText("Upload Failed");
-                        Log.e("CloudinaryError", "Error: " + error.getDescription());
+                        Log.e("CloudinaryError", "Error: " + error.getDescription() + " (Code: " + error.getCode() + ")");
                         Toast.makeText(AdminUploadActivity.this, "Upload Error: " + error.getDescription(), Toast.LENGTH_LONG).show();
                     }
                     @Override public void onStart(String requestId) {}
